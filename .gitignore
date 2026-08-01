@@ -1,0 +1,9 @@
+*.wav
+*.zip
+*.mp4
+*.mp3
+*.onnx
+
+bin/
+obj/
+Outputs/
