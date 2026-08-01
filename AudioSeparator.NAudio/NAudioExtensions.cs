@@ -1,0 +1,13 @@
+﻿using AudioSeparator.Abstractions;
+using AudioSeparator.Abstractions.Builder;
+
+namespace AudioSeparator.NAudio;
+
+public static class NAudioExtensions
+{
+    public static TBuilder UseNAudio<TBuilder>(this TBuilder builder)
+    where TBuilder : IAudioSeparatorBuilder<TBuilder>
+    {
+        return builder.UseAudio(new NAudioReader(), new NAudioWriter());
+    }
+}
