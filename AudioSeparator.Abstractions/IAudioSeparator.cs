@@ -4,5 +4,5 @@ namespace AudioSeparator.Abstractions;
 
 public interface IAudioSeparator : IDisposable
 {
-    IAsyncEnumerable<IProcessTask> Separate(string fileName);
+    IAsyncEnumerable<IProcessTask> Separate(string fileName, CancellationToken cancellationToken);
 }

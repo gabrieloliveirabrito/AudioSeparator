@@ -4,6 +4,6 @@ namespace AudioSeparator.Abstractions.Audio;
 
 public interface IAudioReader
 {
-    Task<IAudioChunk[]> Read(Stream input, IModelMetadata modelMetadata);
-    Task<IAudioChunk[]> Read(string fileName, IModelMetadata modelMetadata);
+    IAsyncEnumerable<AudioChunk> ReadAsync(Stream input, int inputSize, CancellationToken cancellationToken = default);
+    IAsyncEnumerable<AudioChunk> ReadAsync(string fileName, int inputSize, CancellationToken cancellationToken = default);
 }

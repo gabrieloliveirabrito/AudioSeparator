@@ -4,7 +4,9 @@ public interface IProcessTask
 {
     string Description { get; set; }
 
-    void ReportProgress(int current, int total);
+    void SetProgressCallback(Action<long, long> callback);
+    void ClearProgressCallback();
+    void ReportProgress(long current, long total);
 
     Task ExecuteAsync(CancellationToken cancellationToken = default);
 }
