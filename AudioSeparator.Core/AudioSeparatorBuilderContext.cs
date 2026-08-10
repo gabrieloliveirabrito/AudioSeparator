@@ -7,4 +7,6 @@ public abstract class AudioSeparatorBuilderContext : IAudioSeparatorBuilderConte
 {
     public IAudioReader? AudioReader { get; set; }
     public IAudioWriter? AudioWriter { get; set; }
+
+    public string[] StemNames { get; set; } = [];
 }

@@ -7,13 +7,21 @@ using AudioSeparator.Abstractions.Model;
 namespace AudioSeparator.Core;
 
 public class AudioSeparatorContext : IAudioSeparatorContext
-{    
-    public string? ModelFilename { get; set; }
+{
+    public AudioSeparatorContext(AudioSeparatorBuilderContext builderContext)
+    {
+        builderContext.AudioWriter.ThrowIfNull();
+        builderContext.AudioReader.ThrowIfNull();
+
+        AudioWriter = builderContext.AudioWriter;
+        AudioReader = builderContext.AudioReader;
+    }
+
     public string? InputFilename { get; set; }
     public Stream? InputStream { get; set; }
 
-    public required IAudioWriter AudioWriter { get; set; }
-    public required IAudioReader AudioReader { get; set; }
+    public IAudioWriter AudioWriter { get; set; }
+    public IAudioReader AudioReader { get; set; }
 
     public ModelMetadata? ModelMetadata { get; set; }
     public AudioMetadata? AudioMetadata { get; set; }
