@@ -1,6 +1,6 @@
 using AudioSeparator.Onnx;
 
-namespace AudioSeparator.Demucs;
+namespace AudioSeparator.Onnx.Demucs;
 
 public class DemucsBuilderContext : OnnxBuilderContext
 {
