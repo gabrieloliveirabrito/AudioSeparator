@@ -6,7 +6,7 @@ using Spectre.Console;
 var modelPath = Path.Combine(Environment.CurrentDirectory, "..", "htdemucs.onnx");
 var inputPath = Path.Combine(Environment.CurrentDirectory, "..", "..", "44100.wav");
 
-var builder = DemucsBuilder.Create()
+var builder = DemucsBuilder.Create(modelPath)
 .UseNAudio()
 .ConfigureSessionOptions(options =>
 {
@@ -14,7 +14,7 @@ var builder = DemucsBuilder.Create()
     options.GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL;
 });
 
-using var separator = builder.Build(modelPath);
+using var separator = builder.Build();
 
 await AnsiConsole.Progress().StartAsync(async ctx =>
 {
