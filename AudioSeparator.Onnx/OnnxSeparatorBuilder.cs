@@ -5,7 +5,7 @@ namespace AudioSeparator.Onnx;
 
 public abstract class OnnxSeparatorBuilder<TBuilder, TContext> : AudioSeparatorBuilder<TBuilder, TContext>
 where TBuilder : OnnxSeparatorBuilder<TBuilder, TContext>
-where TContext : OnnxBuilderContext
+where TContext : OnnxSeparatorBuilderContext
 {
 
     protected OnnxSeparatorBuilder() : base()
