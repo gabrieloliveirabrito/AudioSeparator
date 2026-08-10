@@ -1,34 +1,35 @@
 ﻿using System.Runtime.CompilerServices;
 using AudioSeparator.Abstractions;
 using AudioSeparator.Abstractions.Tasks;
+using AudioSeparator.Core.Tasks;
 
 namespace AudioSeparator.Core;
 
-public abstract class AudioSeparatorBase<TContext> : IAudioSeparator
+public abstract class AudioSeparatorBase<TContext>(AudioSeparatorBuilderContext builderContext) : IAudioSeparator
 where TContext : AudioSeparatorContext
 {
     private bool disposing = false;
-    private string modelPath;
 
-    public AudioSeparatorBase(string modelPath)
+    protected virtual TContext CreateContext()
     {
-        this.modelPath = modelPath;
-
-        if (!File.Exists(modelPath))
-        {
-            throw new FileNotFoundException("The model path hasn't' been found!", modelPath);
-        }
+        return (TContext)new AudioSeparatorContext(builderContext);
     }
 
-    protected abstract TContext CreateContext();
     protected abstract IEnumerable<IProcessTask> CreateProcessesTask(TContext context);
 
     public virtual async IAsyncEnumerable<IProcessTask> Separate(string fileName, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var context = CreateContext();
         context.InputFilename = fileName;
-        context.ModelFilename = modelPath;
-        
+
+        await foreach (var task in ExecuteTasks(context, cancellationToken))
+        {
+            yield return task;
+        }
+    }
+
+    private async IAsyncEnumerable<IProcessTask> ExecuteTasks(TContext context, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {   
         var tasks = new List<Func<CancellationToken, Task>>();
 
         foreach (var processTask in CreateProcessesTask(context))

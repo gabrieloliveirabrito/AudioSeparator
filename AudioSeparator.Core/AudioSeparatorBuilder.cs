@@ -16,7 +16,7 @@ where TContext : AudioSeparatorBuilderContext
     }
 
     protected abstract TContext CreateContext();
-    public abstract IAudioSeparator Build(string modelPath);
+    public abstract IAudioSeparator Build();
 
     protected virtual TBuilder CastThis()
     {
@@ -27,6 +27,13 @@ where TContext : AudioSeparatorBuilderContext
     {
         Context.AudioReader = reader;
         Context.AudioWriter = writer;
+
+        return CastThis();
+    }
+
+    public virtual TBuilder UseStemNames(params string[] stemNames)
+    {
+        Context.StemNames = stemNames;
 
         return CastThis();
     }

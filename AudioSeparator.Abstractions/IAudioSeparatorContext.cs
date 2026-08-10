@@ -9,9 +9,6 @@ public interface IAudioSeparatorContext
     IAudioReader AudioReader { get; set; }
     IAudioWriter AudioWriter { get; set; }
 
-    ModelMetadata? ModelMetadata { get; }
-    AudioMetadata? AudioMetadata { get; set; }
-
     Memory<AudioChunk> InputChunks { get; set; }
     ConcurrentDictionary<int, AudioChunk[]> OutputChunks { get; set; }
 }

@@ -6,5 +6,6 @@ public interface IAudioSeparatorBuilder<TBuilder>
 where TBuilder : IAudioSeparatorBuilder<TBuilder>
 {
     TBuilder UseAudio(IAudioReader reader, IAudioWriter writer);
-    IAudioSeparator Build(string modelPath);
+    TBuilder UseStemNames(params string[] stemNames);
+    IAudioSeparator Build();
 }

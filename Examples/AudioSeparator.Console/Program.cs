@@ -13,16 +13,16 @@ public class Program
         var modelPath = Path.Combine(Environment.CurrentDirectory, "..", "htdemucs.onnx");
         var inputPath = Path.Combine(Environment.CurrentDirectory, "..", "..", "44100-full.wav");
 
-        var builder = DemucsBuilder.Create()
-        .UseNAudio()
-        //.UseFFMPEG()
+        var builder = DemucsBuilder.Create(modelPath)
+        //.UseNAudio()
+        .UseFFMPEG()
         .ConfigureSessionOptions(options =>
         {
             options.AppendExecutionProvider_CUDA(0x28A1);
             options.GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL;
         });
 
-        using var separator = builder.Build(modelPath);
+        using var separator = builder.Build();
         await foreach (var task in separator.Separate(inputPath))
         {
             System.Console.WriteLine(task.Description);
