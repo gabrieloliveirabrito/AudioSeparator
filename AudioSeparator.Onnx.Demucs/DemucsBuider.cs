@@ -1,4 +1,4 @@
-namespace AudioSeparator.Demucs;
+namespace AudioSeparator.Onnx.Demucs;
 
 using AudioSeparator.Onnx;
 
