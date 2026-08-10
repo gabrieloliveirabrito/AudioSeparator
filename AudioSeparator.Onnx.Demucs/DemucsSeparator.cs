@@ -13,9 +13,8 @@ public class DemucsAudioReadTask(DemucsContext context) : AudioReadTask(context)
     public override async Task ExecuteAsync(CancellationToken cancellationToken = default)
     {
         await base.ExecuteAsync(cancellationToken);
-        Console.WriteLine(context.InputChunks.Length);
 
-        if(MemoryMarshal.TryGetArray<AudioChunk>(context.InputChunks, out var segment))
+        if (MemoryMarshal.TryGetArray<AudioChunk>(context.InputChunks, out var segment))
         {
             context.OutputChunks[0] = segment.Array ?? throw new NullReferenceException("Invalid audio memory segment");
             return;
@@ -25,14 +24,14 @@ public class DemucsAudioReadTask(DemucsContext context) : AudioReadTask(context)
     }
 }
 
-public class DemucsSeparator(string modelPath, DemucsBuilderContext context) : OnnxSeparator<DemucsContext>(modelPath, context)
+public class DemucsSeparator(DemucsSeparatorBuilderContext context) : OnnxSeparator<DemucsContext>(context)
 {
     protected override DemucsContext CreateContext()
     {
         context.AudioReader.ThrowIfNull();
         context.AudioWriter.ThrowIfNull();
 
-        return new DemucsContext
+        return new DemucsContext(context)
         {
             AudioReader = context.AudioReader,
             AudioWriter = context.AudioWriter,
