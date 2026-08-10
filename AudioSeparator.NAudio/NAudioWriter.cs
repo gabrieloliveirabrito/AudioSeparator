@@ -1,53 +1,40 @@
 using AudioSeparator.Abstractions.Audio;
 using AudioSeparator.Abstractions.Model;
+using NAudio.Utils;
 using NAudio.Wave;
 
 namespace AudioSeparator.NAudio;
 
 public class NAudioWriter : IAudioWriter
 {
-    private void ResetStreamPosition(Stream input)
-    {
-        if (input.CanSeek)
-        {
-            input.Seek(0, SeekOrigin.Begin);
-        }
-    }
-
-    public async Task Write(Stream destination, IAudioChunk[] chunks, IModelMetadata modelMetadata)
+    public async Task WriteAsync(Stream destination, AudioChunk[] chunks, ModelMetadata modelMetadata, CancellationToken cancellationToken = default)
     {
         var waveFormat = WaveFormat.CreateIeeeFloatWaveFormat(modelMetadata.AudioFrequency, modelMetadata.OutputChannels);
 
-        using (var memory = new MemoryStream())
-        using (var rawStream = new RawSourceWaveStream(memory, waveFormat))
+        using var ignoreDispose = new IgnoreDisposeStream(destination);
+        using var wavStream = new WaveFileWriter(ignoreDispose, waveFormat);
+
+        foreach (var chunk in chunks.OrderBy(c => c.Index))
         {
-            foreach (var chunk in chunks.OrderBy(c => c.Index))
+            for (int sampleIndex = 0; sampleIndex < chunk.Samples.Length; sampleIndex += modelMetadata.OutputChannels)
             {
-                var buffer = new float[chunk.Length];
-                for (int sampleIndex = 0; sampleIndex < chunk.Samples.Length; sampleIndex++)
+                for (int channelIndex = 0; channelIndex < modelMetadata.OutputChannels; channelIndex++)
                 {
-                    float[] sampleData = chunk.Samples[sampleIndex];
-                    for (int channelIndex = 0; channelIndex < modelMetadata.OutputChannels; channelIndex++)
-                    {
-                        buffer[sampleIndex + channelIndex] = sampleData[channelIndex];
-                    }
+                    var sample = chunk.Samples.Span[sampleIndex + channelIndex];
+                    wavStream.WriteSample(sample);
                 }
-
-                var waveBuffer = new WaveBuffer(buffer.Length * 4);
-                Array.Copy(buffer, waveBuffer.FloatBuffer, buffer.Length);
-
-                await rawStream.WriteAsync(waveBuffer.ByteBuffer, 0, waveBuffer.ByteBufferCount);
             }
-
-            memory.Position = 0;
-            await memory.CopyToAsync(destination);
         }
     }
 
-    public async Task Write(string fileName, IAudioChunk[] chunks, IModelMetadata modelMetadata)
+    public async Task WriteAsync(string fileName, AudioChunk[] chunks, ModelMetadata modelMetadata, CancellationToken cancellationToken = default)
     {
+        using var memory = new MemoryStream();
+        await WriteAsync(memory, chunks, modelMetadata);
+
+        memory.Seek(0, SeekOrigin.Begin);
         using var fileStream = File.Create(fileName);
 
-        await Write(fileStream, chunks, modelMetadata);
+        await memory.CopyToAsync(fileStream);
     }
 }
