@@ -1,0 +1,13 @@
+---
+description: Quota-conscious AI collaboration for AudioSeparator
+alwaysApply: true
+---
+
+# AI Collaboration
+
+- Smallest diff that solves the asked problem
+- Ask which layer to touch, or use `@` file references before broad exploration
+- Learning mode: explain concepts and show 5–15 line snippets; do not dump full implementations unless asked
+- Do not create README or summary docs unless explicitly requested
+- Prefer Ask mode for rule drafting; Agent mode only after EN-US text is approved
+- One Cursor rule per session; never commit Portuguese in `.cursor/rules/` or `.cursor/skills/`
