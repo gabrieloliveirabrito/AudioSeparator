@@ -1,4 +1,7 @@
-﻿using AudioSeparator.Abstractions.Builder;
+﻿using AudioSeparator.Abstractions;
+using AudioSeparator.Abstractions.Audio;
+using AudioSeparator.Abstractions.Builder;
+using AudioSeparator.FFMPEG.Entities;
 
 namespace AudioSeparator.FFMPEG;
 
@@ -38,12 +41,22 @@ public static class FFMPEGExtensions
         throw new FileNotFoundException($"The executable {executable} hasn't been found!");
     }
 
-    public static TBuilder UseFFMPEG<TBuilder>(this IAudioSeparatorBuilder<TBuilder> builder)
+    public static TBuilder UseFFMPEG<TBuilder>(this IAudioSeparatorBuilder<TBuilder> builder, Action<FFMPEGSettings>? configure = null)
     where TBuilder : IAudioSeparatorBuilder<TBuilder>
     {
+        var settings = new FFMPEGSettings();
+        configure?.Invoke(settings);
+
         var ffmpegPath = FindExecutablePath("ffmpeg");
         var ffprobePath = FindExecutablePath("ffprobe");
 
-        return builder.UseAudio(new FFMPEGAudioReader(ffmpegPath, ffprobePath), new FFMPEGAudioWriter(ffmpegPath));
+        return builder.UseReader(new FFMPEGAudioReader(ffmpegPath, ffprobePath));
+    }
+
+    public static FFMPEGAudioWriter CreateWriter(Action<FFMPEGSettings>? configure = null)
+    {
+        var settings = new FFMPEGSettings();
+        configure?.Invoke(settings);
+        return new FFMPEGAudioWriter(FindExecutablePath("ffmpeg"), settings);
     }
 }

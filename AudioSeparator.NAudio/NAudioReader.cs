@@ -1,15 +1,13 @@
 using System.Buffers;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using AudioSeparator.Abstractions.Audio;
-using AudioSeparator.Abstractions.Model;
 using NAudio.Wave;
 
 namespace AudioSeparator.NAudio;
 
 public class NAudioReader : IAudioReader
 {
-    private void ResetStreamPosition(Stream input)
+    private static void ResetStreamPosition(Stream input)
     {
         if (input.CanSeek)
         {
@@ -17,14 +15,15 @@ public class NAudioReader : IAudioReader
         }
     }
 
-    private WaveStream CreateWaveStream(Stream input)
+    private static WaveStream CreateWaveStream(Stream input)
     {
+        ResetStreamPosition(input);
+
         try
         {
-            ResetStreamPosition(input);
             return new StreamMediaFoundationReader(input);
         }
-        catch (Exception ex)
+        catch
         {
             ResetStreamPosition(input);
 
@@ -37,62 +36,53 @@ public class NAudioReader : IAudioReader
                 ResetStreamPosition(input);
                 return new WaveFileReader(input);
             }
-
-            throw new NotSupportedException("Unsupported audio stream format", ex);
         }
     }
 
-    private Task<AudioMetadata> ReadMetadataAsync(Stream input, int inputSize)
+    public Task<AudioSourceInfo> ProbeAsync(Stream input, int inputFrameCount, CancellationToken cancellationToken = default)
     {
         using var reader = CreateWaveStream(input);
         var waveFormat = reader.WaveFormat;
-
         var frames = reader.Length / waveFormat.BlockAlign;
-        var chunkCount = (int)Math.Ceiling(frames / (double)inputSize);
+        var chunkCount = inputFrameCount > 0
+            ? (int)Math.Ceiling(frames / (double)inputFrameCount)
+            : 0;
 
-        var metadata = new AudioMetadata
+        return Task.FromResult(new AudioSourceInfo
         {
             SampleRate = waveFormat.SampleRate,
             SampleCount = frames,
             Channels = waveFormat.Channels,
             ChunkCount = chunkCount
-        };
-
-        return Task.FromResult(metadata);
+        });
     }
 
-    public async IAsyncEnumerable<AudioChunk> ReadAsync(Stream input, int inputSize, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async Task<AudioSourceInfo> ProbeAsync(string fileName, int inputFrameCount, CancellationToken cancellationToken = default)
+    {
+        await using var stream = File.OpenRead(fileName);
+        return await ProbeAsync(stream, inputFrameCount, cancellationToken);
+    }
+
+    public async IAsyncEnumerable<AudioChunk> ReadAsync(Stream input, int inputFrameCount, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var buffer = ArrayPool<float>.Shared.Rent(8192);
         try
         {
             using var reader = CreateWaveStream(input);
             var channels = reader.WaveFormat.Channels;
-
             var frames = reader.Length / reader.WaveFormat.BlockAlign;
-            var chunkCount = (int)Math.Ceiling(frames / (double)inputSize);
-            // if (reader.WaveFormat.SampleRate != modelMetadata.AudioFrequency)
-            // {
-            //     throw new InvalidOperationException($"The model expect {modelMetadata.AudioFrequency} sample rate, but the file has {audioMetadata.SampleRate}.");
-            // }
-
-            // if (reader.WaveFormat.Channels != modelMetadata.InputChannels)
-            // {
-            //     throw new InvalidOperationException($"The model expect {modelMetadata.InputChannels} channels, but rethe file has {audioMetadata.Channels}.");
-            // }
-
+            var chunkCount = (int)Math.Ceiling(frames / (double)inputFrameCount);
             var provider = reader.ToSampleProvider();
 
-            int buffered = 0;
-            int bufferPosition = 0;
+            var buffered = 0;
+            var bufferPosition = 0;
 
-            for (int i = 0; i < chunkCount; i++)
+            for (var i = 0; i < chunkCount; i++)
             {
-                var chunkOffset = inputSize * i;
-                var chunkSize = Math.Min(inputSize, (int)frames - chunkOffset);
-
+                var chunkOffset = inputFrameCount * i;
+                var chunkSize = Math.Min(inputFrameCount, (int)frames - chunkOffset);
                 var chunkData = new float[chunkSize * channels];
-                int sampleIndex = 0;
+                var sampleIndex = 0;
 
                 while (sampleIndex < chunkSize)
                 {
@@ -102,14 +92,16 @@ public class NAudioReader : IAudioReader
                         bufferPosition = 0;
 
                         if (buffered == 0)
+                        {
                             break;
+                        }
                     }
 
-                    while(bufferPosition < buffered && sampleIndex < chunkSize)
+                    while (bufferPosition < buffered && sampleIndex < chunkSize)
                     {
                         var dst = sampleIndex * channels;
 
-                        for (int channel = 0; channel < channels; channel++)
+                        for (var channel = 0; channel < channels; channel++)
                         {
                             chunkData[dst + channel] = buffer[bufferPosition + channel];
                         }
@@ -121,7 +113,8 @@ public class NAudioReader : IAudioReader
 
                 if (buffered == 0)
                 {
-                    throw new InvalidOperationException($"Unexpected end of audio stream. Expected {chunkSize} frames, got {sampleIndex}.");
+                    throw new InvalidOperationException(
+                        $"Unexpected end of audio stream. Expected {chunkSize} frames, got {sampleIndex}.");
                 }
 
                 yield return new AudioChunk(chunkData.AsMemory(), i, chunkSize);
@@ -133,10 +126,10 @@ public class NAudioReader : IAudioReader
         }
     }
 
-    public async IAsyncEnumerable<AudioChunk> ReadAsync(string fileName, int inputSize, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<AudioChunk> ReadAsync(string fileName, int inputFrameCount, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        using var fileStream = File.OpenRead(fileName);
-        await foreach (var chunk in ReadAsync(fileStream, inputSize, cancellationToken))
+        await using var fileStream = File.OpenRead(fileName);
+        await foreach (var chunk in ReadAsync(fileStream, inputFrameCount, cancellationToken))
         {
             yield return chunk;
         }
