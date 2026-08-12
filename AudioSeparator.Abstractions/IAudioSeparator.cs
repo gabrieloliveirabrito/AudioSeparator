@@ -1,8 +1,6 @@
-﻿using AudioSeparator.Abstractions.Tasks;
-
-namespace AudioSeparator.Abstractions;
+﻿namespace AudioSeparator.Abstractions;
 
 public interface IAudioSeparator : IDisposable
 {
-    IAsyncEnumerable<IProcessTask> Separate(string fileName, CancellationToken cancellationToken);
+    Task<ISeparationSession> CreateSession(string inputPath, CancellationToken cancellationToken = default);
 }

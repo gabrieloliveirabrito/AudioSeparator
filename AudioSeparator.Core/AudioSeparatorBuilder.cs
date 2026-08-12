@@ -5,7 +5,7 @@ using AudioSeparator.Abstractions.Audio;
 using AudioSeparator.Abstractions.Builder;
 
 public abstract class AudioSeparatorBuilder<TBuilder, TContext> : IAudioSeparatorBuilder<TBuilder>
-where TBuilder : AudioSeparatorBuilder<TBuilder, TContext> 
+where TBuilder : AudioSeparatorBuilder<TBuilder, TContext>
 where TContext : AudioSeparatorBuilderContext
 {
     protected TContext Context { get; set; }
@@ -23,18 +23,21 @@ where TContext : AudioSeparatorBuilderContext
         return (TBuilder)this;
     }
 
-    public virtual TBuilder UseAudio(IAudioReader reader, IAudioWriter writer)
+    public virtual TBuilder UseReader(IAudioReader reader)
     {
         Context.AudioReader = reader;
-        Context.AudioWriter = writer;
-
         return CastThis();
     }
 
     public virtual TBuilder UseStemNames(params string[] stemNames)
     {
-        Context.StemNames = stemNames;
+        Context.Requirements.StemNames = stemNames;
+        return CastThis();
+    }
 
+    public virtual TBuilder WithRequirements(SeparationRequirements requirements)
+    {
+        Context.Requirements = requirements;
         return CastThis();
     }
 }

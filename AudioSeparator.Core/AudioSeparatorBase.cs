@@ -1,54 +1,67 @@
-﻿using System.Runtime.CompilerServices;
-using AudioSeparator.Abstractions;
+﻿using AudioSeparator.Abstractions;
+using AudioSeparator.Abstractions.Audio;
+using AudioSeparator.Abstractions.Extensions;
 using AudioSeparator.Abstractions.Tasks;
-using AudioSeparator.Core.Tasks;
 
 namespace AudioSeparator.Core;
 
 public abstract class AudioSeparatorBase<TContext>(AudioSeparatorBuilderContext builderContext) : IAudioSeparator
 where TContext : AudioSeparatorContext
 {
-    private bool disposing = false;
+    private bool _disposing;
+
+    protected AudioSeparatorBuilderContext BuilderContext { get; } = builderContext;
 
     protected virtual TContext CreateContext()
     {
-        return (TContext)new AudioSeparatorContext(builderContext);
+        return (TContext)new AudioSeparatorContext(BuilderContext);
     }
 
     protected abstract IEnumerable<IProcessTask> CreateProcessesTask(TContext context);
 
-    public virtual async IAsyncEnumerable<IProcessTask> Separate(string fileName, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    protected virtual void ValidateSource(AudioSeparatorContext context, AudioSourceInfo source)
     {
-        var context = CreateContext();
-        context.InputFilename = fileName;
+        var requirements = context.Requirements;
 
-        await foreach (var task in ExecuteTasks(context, cancellationToken))
+        if (source.SampleRate != requirements.SampleRate)
         {
-            yield return task;
+            throw new InvalidOperationException(
+                $"Expected sample rate {requirements.SampleRate} Hz, but the source is {source.SampleRate} Hz.");
+        }
+
+        var expectedChannels = context.InferenceSpec?.InputChannels;
+        if (expectedChannels is > 0 && source.Channels != expectedChannels)
+        {
+            throw new InvalidOperationException(
+                $"Expected {expectedChannels} channels, but the source has {source.Channels}.");
         }
     }
 
-    private async IAsyncEnumerable<IProcessTask> ExecuteTasks(TContext context, [EnumeratorCancellation] CancellationToken cancellationToken = default)
-    {   
-        var tasks = new List<Func<CancellationToken, Task>>();
+    public virtual async Task<ISeparationSession> CreateSession(
+        string inputPath,
+        CancellationToken cancellationToken = default)
+    {
+        var context = CreateContext();
+        context.InputFilename = inputPath;
+        context.InferenceSpec.ThrowIfNull();
 
-        foreach (var processTask in CreateProcessesTask(context))
-        {
-            yield return processTask;
-            tasks.Add(processTask.ExecuteAsync);
-        }
+        var source = await context.AudioReader.ProbeAsync(
+            inputPath,
+            context.InferenceSpec.InputFrameCount,
+            cancellationToken);
 
-        foreach (var task in tasks)
-        {
-            await task(cancellationToken).WaitAsync(cancellationToken);
-        }
+        context.SourceInfo = source;
+        ValidateSource(context, source);
+
+        var tasks = CreateProcessesTask(context).ToList();
+        return new SeparationSession(context, tasks, source);
     }
 
     public virtual void Dispose()
     {
-        if (!disposing)
+        if (!_disposing)
         {
-            disposing = true;
+            _disposing = true;
         }
     }
 }

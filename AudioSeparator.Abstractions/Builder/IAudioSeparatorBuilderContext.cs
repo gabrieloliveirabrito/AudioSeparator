@@ -5,6 +5,5 @@ namespace AudioSeparator.Abstractions.Builder;
 public interface IAudioSeparatorBuilderContext
 {
     IAudioReader? AudioReader { get; set; }
-    IAudioWriter? AudioWriter { get; set; }
-    string[] StemNames { get; set; }
+    SeparationRequirements Requirements { get; set; }
 }
