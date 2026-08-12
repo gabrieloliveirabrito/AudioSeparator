@@ -8,6 +8,11 @@ public class DemucsBuilder : OnnxSeparatorBuilder<DemucsBuilder, DemucsSeparator
     private DemucsBuilder(string modelPath)
     {
         Context.ModelPath = modelPath;
+        Context.Requirements = new SeparationRequirements
+        {
+            SampleRate = 44100,
+            StemNames = ["drums", "bass", "other", "vocals"]
+        };
     }
 
     protected override DemucsSeparatorBuilderContext CreateContext()

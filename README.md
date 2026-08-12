@@ -20,7 +20,6 @@ using AudioSeparator.NAudio;
 using AudioSeparator.Onnx.Demucs;
 
 var builder = DemucsBuilder.Create("model.onnx")
-    .UseStemNames("drums", "bass", "other", "vocals")
     .UseNAudio();
 
 using var separator = builder.Build();
@@ -45,6 +44,26 @@ await result.WriteToDirectoryAsync("./Outputs");
 - ONNX model file (not included in this repository)
 - FFMPEG in `PATH` (optional, for FFMPEG reader/writer)
 - CUDA (optional, for GPU ONNX execution)
+
+## Audio format
+
+ONNX models expose tensor dimensions (channels, frame count, stem count) but not sample rate. Use a model-specific builder when available:
+
+| Builder | Sample rate | Default stem names |
+|---------|-------------|-------------------|
+| `DemucsBuilder` | 44100 Hz | drums, bass, other, vocals |
+
+For other ONNX models without a dedicated package, set requirements explicitly via `WithRequirements`:
+
+```csharp
+.WithRequirements(new SeparationRequirements
+{
+    SampleRate = 48000,
+    StemNames = ["vocals", "instrumental"]
+})
+```
+
+When `SampleRate` is zero (the default), sample rate is not validated and output stems use the source file rate.
 
 ## Build
 

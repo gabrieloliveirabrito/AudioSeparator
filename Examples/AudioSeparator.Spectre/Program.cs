@@ -10,7 +10,6 @@ var inputPath = Path.Combine(Environment.CurrentDirectory, "..", "..", "44100.wa
 var outputDirectory = Path.Combine(Environment.CurrentDirectory, "Outputs");
 
 var builder = DemucsBuilder.Create(modelPath)
-    .UseStemNames("drums", "bass", "other", "vocals")
     //.UseNAudio()
     .UseFFMPEG(options => {
         options.OutputFormat = "mp3";
