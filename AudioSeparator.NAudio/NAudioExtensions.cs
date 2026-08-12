@@ -1,4 +1,5 @@
 ﻿using AudioSeparator.Abstractions;
+using AudioSeparator.Abstractions.Audio;
 using AudioSeparator.Abstractions.Builder;
 
 namespace AudioSeparator.NAudio;

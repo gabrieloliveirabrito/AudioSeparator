@@ -1,21 +1,15 @@
-﻿using AudioSeparator.Core;
-using Microsoft.ML.OnnxRuntime;
-
 namespace AudioSeparator.Onnx;
+
+using AudioSeparator.Core;
+using Microsoft.ML.OnnxRuntime;
 
 public abstract class OnnxSeparatorBuilder<TBuilder, TContext> : AudioSeparatorBuilder<TBuilder, TContext>
 where TBuilder : OnnxSeparatorBuilder<TBuilder, TContext>
-where TContext : OnnxBuilderContext
+where TContext : OnnxSeparatorBuilderContext
 {
-
-    protected OnnxSeparatorBuilder() : base()
-    {
-    }
-
     public TBuilder ConfigureSessionOptions(Action<SessionOptions> configure)
     {
-        configure(Context.SessionOptions);
-
+        Context.ConfigureSession = configure;
         return CastThis();
     }
 }

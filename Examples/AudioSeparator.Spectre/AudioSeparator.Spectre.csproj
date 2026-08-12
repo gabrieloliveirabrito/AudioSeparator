@@ -15,6 +15,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\AudioSeparator.Onnx.Demucs\AudioSeparator.Onnx.Demucs.csproj" />
     <ProjectReference Include="..\..\AudioSeparator.NAudio\AudioSeparator.NAudio.csproj" />
+    <ProjectReference Include="..\..\AudioSeparator.FFMPEG\AudioSeparator.FFMPEG.csproj" />
   </ItemGroup>
 
 </Project>

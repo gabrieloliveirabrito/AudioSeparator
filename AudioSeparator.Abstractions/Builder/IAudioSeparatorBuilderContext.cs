@@ -6,4 +6,5 @@ public interface IAudioSeparatorBuilderContext
 {
     IAudioReader? AudioReader { get; set; }
     IAudioWriter? AudioWriter { get; set; }
+    SeparationRequirements Requirements { get; set; }
 }

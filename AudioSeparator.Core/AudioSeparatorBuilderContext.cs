@@ -1,3 +1,4 @@
+using AudioSeparator.Abstractions;
 using AudioSeparator.Abstractions.Audio;
 using AudioSeparator.Abstractions.Builder;
 
@@ -7,4 +8,5 @@ public abstract class AudioSeparatorBuilderContext : IAudioSeparatorBuilderConte
 {
     public IAudioReader? AudioReader { get; set; }
     public IAudioWriter? AudioWriter { get; set; }
+    public SeparationRequirements Requirements { get; set; } = new();
 }

@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 using AudioSeparator.Abstractions.Audio;
-using AudioSeparator.Abstractions.Model;
+using AudioSeparator.Abstractions.Inference;
 
 namespace AudioSeparator.Abstractions;
 
@@ -8,10 +8,9 @@ public interface IAudioSeparatorContext
 {
     IAudioReader AudioReader { get; set; }
     IAudioWriter AudioWriter { get; set; }
-
-    ModelMetadata? ModelMetadata { get; }
-    AudioMetadata? AudioMetadata { get; set; }
-
     Memory<AudioChunk> InputChunks { get; set; }
-    ConcurrentDictionary<int, AudioChunk[]> OutputChunks { get; set; }
+    ConcurrentDictionary<string, AudioChunk[]> OutputStems { get; set; }
+    InferenceSpec? InferenceSpec { get; set; }
+    AudioSourceInfo? SourceInfo { get; set; }
+    SeparationRequirements Requirements { get; set; }
 }
