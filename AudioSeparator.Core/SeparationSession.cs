@@ -46,13 +46,17 @@ public sealed class SeparationSession : ISeparationSession
             throw new InvalidOperationException("Source metadata is missing.");
         }
 
+        var outputSampleRate = _context.Requirements.SampleRate > 0
+            ? _context.Requirements.SampleRate
+            : _context.SourceInfo.SampleRate;
+
         var stems = new Dictionary<string, StemAudio>();
         foreach (var (name, chunks) in _context.OutputStems)
         {
             stems[name] = new StemAudio
             {
                 Name = name,
-                SampleRate = _context.Requirements.SampleRate,
+                SampleRate = outputSampleRate,
                 Channels = _context.InferenceSpec?.OutputChannels ?? _context.SourceInfo.Channels,
                 Chunks = chunks
             };
