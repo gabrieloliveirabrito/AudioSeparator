@@ -7,6 +7,7 @@ namespace AudioSeparator.FFMPEG;
 
 public class FFMPEGAudioWriter(string ffmpegPath, Entities.FFMPEGSettings settings) : IAudioWriter
 {
+    public string PreferredExtension => settings.OutputFormat;
     public async Task WriteAsync(Stream destination, StemAudio stem, CancellationToken cancellationToken = default)
     {
         var psi = new ProcessStartInfo
@@ -57,7 +58,13 @@ public class FFMPEGAudioWriter(string ffmpegPath, Entities.FFMPEGSettings settin
 
         await Task.WhenAll(writeTask, readTask).WaitAsync(cancellationToken);
         await process.WaitForExitAsync(cancellationToken);
-        _ = await errTask;
+        var stderr = await errTask;
+        if (process.ExitCode != 0)
+        {
+            throw new Exception(string.IsNullOrEmpty(stderr)
+                ? $"ffmpeg exited with code {process.ExitCode}"
+                : stderr);
+        }
     }
 
     public async Task WriteAsync(string fileName, StemAudio stem, CancellationToken cancellationToken = default)

@@ -7,6 +7,7 @@ namespace AudioSeparator.Abstractions;
 public interface IAudioSeparatorContext
 {
     IAudioReader AudioReader { get; set; }
+    IAudioWriter AudioWriter { get; set; }
     Memory<AudioChunk> InputChunks { get; set; }
     ConcurrentDictionary<string, AudioChunk[]> OutputStems { get; set; }
     InferenceSpec? InferenceSpec { get; set; }

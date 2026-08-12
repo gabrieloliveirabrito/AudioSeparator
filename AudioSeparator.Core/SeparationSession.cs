@@ -1,16 +1,17 @@
 using AudioSeparator.Abstractions;
 using AudioSeparator.Abstractions.Audio;
+using AudioSeparator.Abstractions.Tasks;
 
 namespace AudioSeparator.Core;
 
 public sealed class SeparationSession : ISeparationSession
 {
     private readonly AudioSeparatorContext _context;
-    private readonly IReadOnlyList<Abstractions.Tasks.IProcessTask> _tasks;
+    private readonly IReadOnlyList<IProcessTask> _tasks;
 
     public SeparationSession(
         AudioSeparatorContext context,
-        IReadOnlyList<Abstractions.Tasks.IProcessTask> tasks,
+        IReadOnlyList<IProcessTask> tasks,
         AudioSourceInfo source)
     {
         _context = context;
@@ -19,7 +20,7 @@ public sealed class SeparationSession : ISeparationSession
     }
 
     public AudioSourceInfo Source { get; }
-    public IReadOnlyList<Abstractions.Tasks.IProcessTask> Tasks => _tasks;
+    public IReadOnlyList<IProcessTask> Tasks => _tasks;
 
     public async Task<SeparationResult> RunAsync(CancellationToken cancellationToken = default)
     {
@@ -60,7 +61,8 @@ public sealed class SeparationSession : ISeparationSession
         return new SeparationResult
         {
             Source = _context.SourceInfo,
-            Stems = stems
+            Stems = stems,
+            Writer = _context.AudioWriter
         };
     }
 }

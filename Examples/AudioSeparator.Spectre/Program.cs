@@ -1,18 +1,25 @@
-﻿using AudioSeparator.NAudio;
+﻿using AudioSeparator.Abstractions;
+using AudioSeparator.NAudio;
+using AudioSeparator.FFMPEG;
 using AudioSeparator.Onnx.Demucs;
 using Microsoft.ML.OnnxRuntime;
 using Spectre.Console;
 
 var modelPath = Path.Combine(Environment.CurrentDirectory, "..", "htdemucs.onnx");
-var inputPath = Path.Combine(Environment.CurrentDirectory, "..", "..", "mirai4.wav");
+var inputPath = Path.Combine(Environment.CurrentDirectory, "..", "..", "44100.wav");
 var outputDirectory = Path.Combine(Environment.CurrentDirectory, "Outputs");
 
 var builder = DemucsBuilder.Create(modelPath)
     .UseStemNames("drums", "bass", "other", "vocals")
-    .UseNAudio()
+    //.UseNAudio()
+    .UseFFMPEG(options => {
+        options.OutputFormat = "mp3";
+        options.OutputCodec = "libmp3lame";
+    })
     .ConfigureSessionOptions(options =>
     {
         options.GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL;
+        options.AppendExecutionProvider_CUDA(0);
     });
 
 using var separator = builder.Build();
@@ -36,8 +43,7 @@ await AnsiConsole.Progress().StartAsync(async ctx =>
     }
 
     var result = await session.RunAsync();
-    var writer = NAudioExtensions.CreateWriter();
-    await result.WriteToDirectoryAsync(outputDirectory, writer);
+    await result.WriteToDirectoryAsync(outputDirectory);
 
     AnsiConsole.MarkupLine($"[green]Wrote {result.Stems.Count} stems to {outputDirectory}[/]");
 });

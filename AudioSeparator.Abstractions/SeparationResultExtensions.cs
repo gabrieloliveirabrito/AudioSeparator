@@ -1,10 +1,17 @@
-using AudioSeparator.Abstractions;
 using AudioSeparator.Abstractions.Audio;
 
-namespace AudioSeparator.FFMPEG;
+namespace AudioSeparator.Abstractions;
 
 public static class SeparationResultExtensions
 {
+    public static Task WriteToDirectoryAsync(
+        this SeparationResult result,
+        string directory,
+        CancellationToken cancellationToken = default)
+    {
+        return result.WriteToDirectoryAsync(directory, result.Writer, cancellationToken);
+    }
+
     public static async Task WriteToDirectoryAsync(
         this SeparationResult result,
         string directory,
@@ -17,7 +24,7 @@ public static class SeparationResultExtensions
         {
             var extension = Path.GetExtension(name);
             var fileName = string.IsNullOrEmpty(extension)
-                ? Path.Combine(directory, $"{name}.wav")
+                ? Path.Combine(directory, $"{name}.{writer.PreferredExtension}")
                 : Path.Combine(directory, name);
 
             await writer.WriteAsync(fileName, stem, cancellationToken);

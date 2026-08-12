@@ -7,5 +7,6 @@ namespace AudioSeparator.Core;
 public abstract class AudioSeparatorBuilderContext : IAudioSeparatorBuilderContext
 {
     public IAudioReader? AudioReader { get; set; }
+    public IAudioWriter? AudioWriter { get; set; }
     public SeparationRequirements Requirements { get; set; } = new();
 }

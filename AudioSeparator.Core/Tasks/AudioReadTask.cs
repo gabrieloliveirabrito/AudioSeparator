@@ -13,18 +13,27 @@ public class AudioReadTask(AudioSeparatorContext context) : ProcessTask("Reading
 
         ReportProgress(0, 100);
 
-        using var inputStream = string.IsNullOrEmpty(context.InputFilename)
-            ? context.InputStream
-            : File.OpenRead(context.InputFilename);
-        inputStream.ThrowIfNull();
-
         var chunks = new List<AudioChunk>();
-        await foreach (var chunk in context.AudioReader.ReadAsync(
-            inputStream,
-            context.InferenceSpec.InputFrameCount,
-            cancellationToken))
+        if (!string.IsNullOrEmpty(context.InputFilename))
         {
-            chunks.Add(chunk);
+            await foreach (var chunk in context.AudioReader.ReadAsync(
+                context.InputFilename,
+                context.InferenceSpec.InputFrameCount,
+                cancellationToken))
+            {
+                chunks.Add(chunk);
+            }
+        }
+        else
+        {
+            context.InputStream.ThrowIfNull();
+            await foreach (var chunk in context.AudioReader.ReadAsync(
+                context.InputStream,
+                context.InferenceSpec.InputFrameCount,
+                cancellationToken))
+            {
+                chunks.Add(chunk);
+            }
         }
 
         context.InputChunks = chunks.ToArray().AsMemory();

@@ -50,13 +50,8 @@ public static class FFMPEGExtensions
         var ffmpegPath = FindExecutablePath("ffmpeg");
         var ffprobePath = FindExecutablePath("ffprobe");
 
-        return builder.UseReader(new FFMPEGAudioReader(ffmpegPath, ffprobePath));
-    }
-
-    public static FFMPEGAudioWriter CreateWriter(Action<FFMPEGSettings>? configure = null)
-    {
-        var settings = new FFMPEGSettings();
-        configure?.Invoke(settings);
-        return new FFMPEGAudioWriter(FindExecutablePath("ffmpeg"), settings);
+        return builder.UseAudio(
+            new FFMPEGAudioReader(ffmpegPath, ffprobePath),
+            new FFMPEGAudioWriter(ffmpegPath, settings));
     }
 }
