@@ -1,8 +1,6 @@
 ﻿namespace AudioSeparator.Console;
 
-using AudioSeparator.Core;
 using AudioSeparator.FFMPEG;
-using AudioSeparator.NAudio;
 using AudioSeparator.Onnx.Demucs;
 using Microsoft.ML.OnnxRuntime;
 
@@ -12,20 +10,34 @@ public class Program
     {
         var modelPath = Path.Combine(Environment.CurrentDirectory, "..", "htdemucs.onnx");
         var inputPath = Path.Combine(Environment.CurrentDirectory, "..", "..", "44100-full.wav");
+        var outputDirectory = Path.Combine(Environment.CurrentDirectory, "Outputs");
 
         var builder = DemucsBuilder.Create(modelPath)
-        //.UseNAudio()
-        .UseFFMPEG()
-        .ConfigureSessionOptions(options =>
-        {
-            options.AppendExecutionProvider_CUDA(0x28A1);
-            options.GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL;
-        });
+            .UseStemNames("drums", "bass", "other", "vocals")
+            .UseFFMPEG(options =>
+            {
+                options.OutputFormat = "mp3";
+            })
+            .ConfigureSessionOptions(options =>
+            {
+                options.GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL;
+            });
 
         using var separator = builder.Build();
-        await foreach (var task in separator.Separate(inputPath))
+        var session = await separator.CreateSession(inputPath);
+
+        foreach (var task in session.Tasks)
         {
-            System.Console.WriteLine(task.Description);
+            global::System.Console.WriteLine(task.Description);
+        }
+
+        var result = await session.RunAsync();
+        var writer = FFMPEGExtensions.CreateWriter(options => options.OutputFormat = "mp3");
+        await result.WriteToDirectoryAsync(outputDirectory, writer);
+
+        foreach (var (name, stem) in result.Stems)
+        {
+            global::System.Console.WriteLine($"Wrote stem: {name}");
         }
     }
 }
