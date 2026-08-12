@@ -1,0 +1,17 @@
+# Build output
+bin/
+obj/
+Outputs/
+
+# Legacy reference (gitignored; @-mention when needed)
+Older/
+
+# Large binaries — never index
+Examples/**/*.onnx
+*.wav
+*.mp3
+*.mp4
+*.zip
+
+# IDE / local (optional, low cost)
+.vscode/

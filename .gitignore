@@ -7,3 +7,5 @@
 bin/
 obj/
 Outputs/
+Older/
+.cursor/drafts/

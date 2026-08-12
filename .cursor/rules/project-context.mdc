@@ -1,0 +1,21 @@
+---
+description: AudioSeparator project context and layer dependencies
+alwaysApply: true
+---
+
+# AudioSeparator
+
+Modular .NET audio stem separator. Packages: `AudioSeparator.Abstractions`, `.Core`, `.Onnx`, `.Onnx.Demucs`, `.FFMPEG`, `.NAudio`.
+
+## Dependency direction
+
+- Abstractions ← Core ← Onnx ← model-specific packages
+- FFMPEG/NAudio → Abstractions only
+
+## Core rules
+
+- Separator **returns** `SeparationResult`; never use `IAudioWriter` in Core or Onnx
+- Use `CreateSession` + `RunAsync`, not legacy `Separate()`
+- Never read or edit paths in `.gitignore` / `.cursorignore`
+- Do not scan the entire repo unless the user `@`-mentions a folder
+- `@Older/` only when explicitly requested
