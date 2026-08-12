@@ -1,5 +1,5 @@
+using AudioSeparator.Abstractions;
 using AudioSeparator.Abstractions.Audio;
-using AudioSeparator.Abstractions.Model;
 using NAudio.Utils;
 using NAudio.Wave;
 
@@ -7,34 +7,34 @@ namespace AudioSeparator.NAudio;
 
 public class NAudioWriter : IAudioWriter
 {
-    public async Task WriteAsync(Stream destination, AudioChunk[] chunks, ModelMetadata modelMetadata, CancellationToken cancellationToken = default)
+    public Task WriteAsync(Stream destination, StemAudio stem, CancellationToken cancellationToken = default)
     {
-        var waveFormat = WaveFormat.CreateIeeeFloatWaveFormat(modelMetadata.AudioFrequency, modelMetadata.OutputChannels);
+        var waveFormat = WaveFormat.CreateIeeeFloatWaveFormat(stem.SampleRate, stem.Channels);
 
         using var ignoreDispose = new IgnoreDisposeStream(destination);
         using var wavStream = new WaveFileWriter(ignoreDispose, waveFormat);
 
-        foreach (var chunk in chunks.OrderBy(c => c.Index))
+        foreach (var chunk in stem.Chunks.OrderBy(c => c.Index))
         {
-            for (int sampleIndex = 0; sampleIndex < chunk.Samples.Length; sampleIndex += modelMetadata.OutputChannels)
+            for (var sampleIndex = 0; sampleIndex < chunk.Samples.Length; sampleIndex += stem.Channels)
             {
-                for (int channelIndex = 0; channelIndex < modelMetadata.OutputChannels; channelIndex++)
+                for (var channelIndex = 0; channelIndex < stem.Channels; channelIndex++)
                 {
-                    var sample = chunk.Samples.Span[sampleIndex + channelIndex];
-                    wavStream.WriteSample(sample);
+                    wavStream.WriteSample(chunk.Samples.Span[sampleIndex + channelIndex]);
                 }
             }
         }
+
+        return Task.CompletedTask;
     }
 
-    public async Task WriteAsync(string fileName, AudioChunk[] chunks, ModelMetadata modelMetadata, CancellationToken cancellationToken = default)
+    public async Task WriteAsync(string fileName, StemAudio stem, CancellationToken cancellationToken = default)
     {
-        using var memory = new MemoryStream();
-        await WriteAsync(memory, chunks, modelMetadata);
+        await using var memory = new MemoryStream();
+        await WriteAsync(memory, stem, cancellationToken);
 
         memory.Seek(0, SeekOrigin.Begin);
-        using var fileStream = File.Create(fileName);
-
-        await memory.CopyToAsync(fileStream);
+        await using var fileStream = File.Create(fileName);
+        await memory.CopyToAsync(fileStream, cancellationToken);
     }
 }
