@@ -1,12 +1,13 @@
 namespace AudioSeparator.Onnx.Demucs;
 
+using AudioSeparator.Abstractions;
 using AudioSeparator.Onnx;
 
 public class DemucsBuilder : OnnxSeparatorBuilder<DemucsBuilder, DemucsSeparatorBuilderContext>
 {
-    protected DemucsBuilder(string modelPath) : base()
+    private DemucsBuilder(string modelPath)
     {
-        
+        Context.ModelPath = modelPath;
     }
 
     protected override DemucsSeparatorBuilderContext CreateContext()
@@ -16,10 +17,10 @@ public class DemucsBuilder : OnnxSeparatorBuilder<DemucsBuilder, DemucsSeparator
 
     public static DemucsBuilder Create(string modelPath)
     {
-        return new(modelPath);
+        return new DemucsBuilder(modelPath);
     }
 
-    public override DemucsSeparator Build()
+    public override IAudioSeparator Build()
     {
         return new DemucsSeparator(Context);
     }
