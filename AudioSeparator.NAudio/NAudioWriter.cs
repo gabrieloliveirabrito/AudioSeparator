@@ -7,6 +7,7 @@ namespace AudioSeparator.NAudio;
 
 public class NAudioWriter : IAudioWriter
 {
+    public string PreferredExtension => "wav";
     public Task WriteAsync(Stream destination, StemAudio stem, CancellationToken cancellationToken = default)
     {
         var waveFormat = WaveFormat.CreateIeeeFloatWaveFormat(stem.SampleRate, stem.Channels);

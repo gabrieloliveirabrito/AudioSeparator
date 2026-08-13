@@ -6,7 +6,7 @@ namespace AudioSeparator.Abstractions.Builder;
 public interface IAudioSeparatorBuilder<TBuilder>
 where TBuilder : IAudioSeparatorBuilder<TBuilder>
 {
-    TBuilder UseReader(IAudioReader reader);
+    TBuilder UseAudio(IAudioReader reader, IAudioWriter writer);
     TBuilder UseStemNames(params string[] stemNames);
     TBuilder WithRequirements(SeparationRequirements requirements);
     IAudioSeparator Build();

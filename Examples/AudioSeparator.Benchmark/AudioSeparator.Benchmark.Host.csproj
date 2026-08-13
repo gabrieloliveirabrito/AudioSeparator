@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -9,10 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Spectre.Console" Version="0.57.2" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <ProjectReference Include="..\..\AudioSeparator.Benchmark\AudioSeparator.Benchmark.csproj" />
     <ProjectReference Include="..\..\AudioSeparator.Onnx.Demucs\AudioSeparator.Onnx.Demucs.csproj" />
     <ProjectReference Include="..\..\AudioSeparator.NAudio\AudioSeparator.NAudio.csproj" />
     <ProjectReference Include="..\..\AudioSeparator.FFMPEG\AudioSeparator.FFMPEG.csproj" />

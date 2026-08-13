@@ -23,9 +23,10 @@ where TContext : AudioSeparatorBuilderContext
         return (TBuilder)this;
     }
 
-    public virtual TBuilder UseReader(IAudioReader reader)
+    public virtual TBuilder UseAudio(IAudioReader reader, IAudioWriter writer)
     {
         Context.AudioReader = reader;
+        Context.AudioWriter = writer;
         return CastThis();
     }
 

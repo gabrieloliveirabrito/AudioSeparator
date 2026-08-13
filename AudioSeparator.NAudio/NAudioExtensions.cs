@@ -9,11 +9,6 @@ public static class NAudioExtensions
     public static TBuilder UseNAudio<TBuilder>(this TBuilder builder)
     where TBuilder : IAudioSeparatorBuilder<TBuilder>
     {
-        return builder.UseReader(new NAudioReader());
-    }
-
-    public static NAudioWriter CreateWriter()
-    {
-        return new NAudioWriter();
+        return builder.UseAudio(new NAudioReader(), new NAudioWriter());
     }
 }

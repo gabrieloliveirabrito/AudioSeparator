@@ -1,5 +1,6 @@
 ﻿namespace AudioSeparator.Console;
 
+using AudioSeparator.Abstractions;
 using AudioSeparator.FFMPEG;
 using AudioSeparator.Onnx.Demucs;
 using Microsoft.ML.OnnxRuntime;
@@ -17,6 +18,7 @@ public class Program
             .UseFFMPEG(options =>
             {
                 options.OutputFormat = "mp3";
+                options.OutputCodec = "libmp3lame";
             })
             .ConfigureSessionOptions(options =>
             {
@@ -32,8 +34,7 @@ public class Program
         }
 
         var result = await session.RunAsync();
-        var writer = FFMPEGExtensions.CreateWriter(options => options.OutputFormat = "mp3");
-        await result.WriteToDirectoryAsync(outputDirectory, writer);
+        await result.WriteToDirectoryAsync(outputDirectory);
 
         foreach (var (name, stem) in result.Stems)
         {

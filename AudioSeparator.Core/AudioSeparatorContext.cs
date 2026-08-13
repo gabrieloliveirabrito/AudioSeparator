@@ -11,7 +11,9 @@ public class AudioSeparatorContext : IAudioSeparatorContext
     public AudioSeparatorContext(AudioSeparatorBuilderContext builderContext)
     {
         builderContext.AudioReader.ThrowIfNull();
+        builderContext.AudioWriter.ThrowIfNull();
         AudioReader = builderContext.AudioReader;
+        AudioWriter = builderContext.AudioWriter;
         Requirements = builderContext.Requirements;
     }
 
@@ -19,6 +21,7 @@ public class AudioSeparatorContext : IAudioSeparatorContext
     public Stream? InputStream { get; set; }
 
     public IAudioReader AudioReader { get; set; }
+    public IAudioWriter AudioWriter { get; set; }
     public InferenceSpec? InferenceSpec { get; set; }
     public AudioSourceInfo? SourceInfo { get; set; }
     public SeparationRequirements Requirements { get; set; }

@@ -30,11 +30,14 @@ foreach (var task in session.Tasks)
     task.SetProgressCallback((current, total) => { /* progress UI */ });
 
 var result = await session.RunAsync();
-var writer = NAudioExtensions.CreateWriter();
-await result.WriteToDirectoryAsync("./Outputs", writer);
+await result.WriteToDirectoryAsync("./Outputs");
 ```
 
-The separator **returns** separated stems (`SeparationResult`). Writing files is the consumer's responsibility via I/O extensions.
+The separator **returns** separated stems (`SeparationResult`). Writing files uses the writer registered at build time via `UseNAudio()` or `UseFFMPEG()`:
+
+```csharp
+await result.WriteToDirectoryAsync("./Outputs");
+```
 
 ## Requirements
 
