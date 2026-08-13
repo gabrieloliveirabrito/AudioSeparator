@@ -1,0 +1,19 @@
+---
+description: Example apps usage patterns
+globs: Examples/**
+alwaysApply: false
+---
+
+# Examples
+
+Demonstrate the public API only — no duplicated business logic.
+
+```csharp
+var session = await separator.CreateSession(inputPath);
+foreach (var task in session.Tasks)
+    task.SetProgressCallback(...);
+var result = await session.RunAsync();
+await result.WriteToDirectoryAsync(outputDir, writer);
+```
+
+Persistence is always in the example, never inside the separator.
