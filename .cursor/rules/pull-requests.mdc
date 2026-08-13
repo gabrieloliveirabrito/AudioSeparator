@@ -1,0 +1,20 @@
+---
+description: Pull requests must target development, not main
+alwaysApply: true
+---
+
+# Pull request base branch
+
+- **Default base branch for PRs:** `development`
+- **Never** open PRs against `main` unless the user explicitly requests a release/hotfix to `main`.
+- When creating a branch for new work, branch from `development`.
+- When using `gh pr create`, always pass `--base development`.
+- `main` is the production/release branch; changes reach it via merge from `development` (or an explicit release PR).
+
+```bash
+# ✅ Correct
+gh pr create --base development --head feature/my-change --title "..." --body "..."
+
+# ❌ Wrong (unless explicitly requested)
+gh pr create --base main ...
+```

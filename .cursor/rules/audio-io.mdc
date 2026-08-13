@@ -1,0 +1,12 @@
+---
+description: FFMPEG and NAudio I/O plugins
+globs: AudioSeparator.{FFMPEG,NAudio}/**
+alwaysApply: false
+---
+
+# Audio I/O
+
+- Implement `IAudioReader` with `ProbeAsync` + `ReadAsync` (single read pass for data)
+- Builder extensions register **reader only**: `.UseFFMPEG()`, `.UseNAudio()`
+- Writers used via `CreateWriter()` + `WriteToDirectoryAsync` / `WriteToFileAsync` extensions
+- `IAudioWriter.WriteAsync` accepts `StemAudio`, not raw pipeline context
