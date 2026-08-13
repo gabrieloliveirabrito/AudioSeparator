@@ -4,6 +4,9 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Version>0.1.0-beta</Version>
+    <PackageVersion>0.1.0-beta</PackageVersion>
+    <Description>NAudio reader and write extensions for the AudioSeparator library.</Description>
   </PropertyGroup>
 
   <ItemGroup>

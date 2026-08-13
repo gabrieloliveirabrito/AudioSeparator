@@ -20,6 +20,7 @@ Only these projects are published to NuGet (not Examples or Older):
 | `AudioSeparator.NAudio` | `AudioSeparator.NAudio` | Abstractions |
 | `AudioSeparator.Onnx` | `AudioSeparator.Onnx` | Core |
 | `AudioSeparator.Onnx.Demucs` | `AudioSeparator.Onnx.Demucs` | Onnx |
+| `AudioSeparator.Benchmark` | `AudioSeparator.Abstractions` | Core |
 
 Examples (`Examples/*`) are never versioned for NuGet.
 
