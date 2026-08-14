@@ -1,0 +1,13 @@
+---
+description: ONNX separation layer
+globs: AudioSeparator.Onnx*/**
+alwaysApply: false
+---
+
+# ONNX Layer
+
+- ONNX-specific code lives in `AudioSeparator.Onnx`, not Core
+- `InferenceSpecReader` introspects session input/output metadata
+- `OnnxInferenceTask` runs chunked inference; output layout `[batch, stems, channels, frames]`
+- Sample rate comes from `SeparationRequirements`, not from the ONNX model
+- Demucs backend: `AudioSeparator.Onnx.Demucs` — one model, not the project name

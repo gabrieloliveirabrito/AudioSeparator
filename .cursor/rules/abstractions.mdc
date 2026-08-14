@@ -1,0 +1,14 @@
+---
+description: Abstractions layer contracts
+globs: AudioSeparator.Abstractions/**
+alwaysApply: false
+---
+
+# Abstractions
+
+- Interfaces and DTOs only; no NuGet references
+- `InferenceSpec` = ONNX tensor layout (no sample rate)
+- `AudioSourceInfo` = reader probe result
+- `SeparationRequirements` = builder config (sample rate, stem names)
+- `IAudioSeparator.CreateSession` returns `ISeparationSession`
+- `IAudioWriter` exists for I/O extensions, not for the separator pipeline
