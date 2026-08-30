@@ -1,4 +1,3 @@
-using AudioSeparator.Abstractions;
 using AudioSeparator.Abstractions.Audio;
 
 namespace AudioSeparator.Abstractions.Builder;
@@ -7,7 +6,21 @@ public interface IAudioSeparatorBuilder<TBuilder>
 where TBuilder : IAudioSeparatorBuilder<TBuilder>
 {
     TBuilder UseAudio(IAudioReader reader, IAudioWriter writer);
+
+    TBuilder UseReader(IAudioReader reader);
+
     TBuilder UseStemNames(params string[] stemNames);
+
     TBuilder WithRequirements(SeparationRequirements requirements);
+
+    TBuilder WithProcessingOptions(SeparationProcessingOptions options);
+
+    TBuilder WithOutputStem(string stemName);
+
+  /// <summary>
+    /// Enables overlap-add stitching. Increases inference time and CPU/GPU usage.
+    /// </summary>
+    TBuilder WithOverlapAdd(bool enabled = true, float overlapRatio = 0.25f);
+
     IAudioSeparator Build();
 }

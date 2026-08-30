@@ -4,9 +4,12 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>0.1.0-beta</Version>
-    <PackageVersion>0.1.0-beta</PackageVersion>
-    <Description>Contracts and DTOs for the AudioSeparator library.</Description>
+    <Version>0.2.0-beta</Version>
+    <PackageVersion>0.2.0-beta</PackageVersion>
+    <Title>AudioSeparator.Abstractions</Title>
+    <Description>Contracts and DTOs for modular audio stem separation — separators, sessions, I/O abstractions, and separation results.</Description>
+    <PackageTags>audio;stem-separation;contracts;dotnet</PackageTags>
+    <PackageProjectUrl>https://github.com/gabrieloliveirabrito/AudioSeparator/tree/main/AudioSeparator.Abstractions</PackageProjectUrl>
   </PropertyGroup>
 
 </Project>

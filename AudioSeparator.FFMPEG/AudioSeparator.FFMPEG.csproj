@@ -1,16 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <ItemGroup>
-    <ProjectReference Include="..\AudioSeparator.Abstractions\AudioSeparator.Abstractions.csproj" />
-  </ItemGroup>
-
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>0.1.0-beta</Version>
-    <PackageVersion>0.1.0-beta</PackageVersion>
-    <Description>FFMPEG reader and write extensions for the AudioSeparator library.</Description>
+    <Version>0.2.0-beta</Version>
+    <PackageVersion>0.2.0-beta</PackageVersion>
+    <Title>AudioSeparator.FFMPEG</Title>
+    <Description>FFMPEG/ffprobe extensions for AudioSeparator — broad format support for reading input and encoding separated stems.</Description>
+    <PackageTags>audio;stem-separation;ffmpeg;dotnet</PackageTags>
+    <PackageProjectUrl>https://github.com/gabrieloliveirabrito/AudioSeparator/tree/main/AudioSeparator.FFMPEG</PackageProjectUrl>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AudioSeparator.Abstractions\AudioSeparator.Abstractions.csproj" />
+  </ItemGroup>
 
 </Project>

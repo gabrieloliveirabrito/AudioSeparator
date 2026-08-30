@@ -4,9 +4,12 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>0.1.0-beta</Version>
-    <PackageVersion>0.1.0-beta</PackageVersion>
-    <Description>Session API and task pipeline for the AudioSeparator library.</Description>
+    <Version>0.2.0-beta</Version>
+    <PackageVersion>0.2.0-beta</PackageVersion>
+    <Title>AudioSeparator.Core</Title>
+    <Description>Session API and task pipeline for AudioSeparator — probe, validate, run tasks, and return separated stems without file I/O.</Description>
+    <PackageTags>audio;stem-separation;pipeline;dotnet</PackageTags>
+    <PackageProjectUrl>https://github.com/gabrieloliveirabrito/AudioSeparator/tree/main/AudioSeparator.Core</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>

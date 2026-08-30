@@ -4,9 +4,12 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>0.1.0-beta</Version>
-    <PackageVersion>0.1.0-beta</PackageVersion>
-    <Description>NAudio reader and write extensions for the AudioSeparator library.</Description>
+    <Version>0.2.0-beta</Version>
+    <PackageVersion>0.2.0-beta</PackageVersion>
+    <Title>AudioSeparator.NAudio</Title>
+    <Description>NAudio reader and writer extensions for AudioSeparator — decode input and save stems as WAV without FFMPEG.</Description>
+    <PackageTags>audio;stem-separation;naudio;wav;dotnet</PackageTags>
+    <PackageProjectUrl>https://github.com/gabrieloliveirabrito/AudioSeparator/tree/main/AudioSeparator.NAudio</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>

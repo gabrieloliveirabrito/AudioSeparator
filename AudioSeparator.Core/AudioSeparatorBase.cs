@@ -2,6 +2,7 @@
 using AudioSeparator.Abstractions.Audio;
 using AudioSeparator.Abstractions.Extensions;
 using AudioSeparator.Abstractions.Tasks;
+using AudioSeparator.Core.Audio;
 
 namespace AudioSeparator.Core;
 
@@ -12,10 +13,7 @@ where TContext : AudioSeparatorContext
 
     protected AudioSeparatorBuilderContext BuilderContext { get; } = builderContext;
 
-    protected virtual TContext CreateContext()
-    {
-        return (TContext)new AudioSeparatorContext(BuilderContext);
-    }
+    protected virtual TContext CreateContext() => (TContext)new AudioSeparatorContext(BuilderContext);
 
     protected abstract IEnumerable<IProcessTask> CreateProcessesTask(TContext context);
 
@@ -49,6 +47,50 @@ where TContext : AudioSeparatorContext
             inputPath,
             context.InferenceSpec.InputFrameCount,
             cancellationToken);
+
+        context.SourceInfo = source;
+        ValidateSource(context, source);
+
+        var tasks = CreateProcessesTask(context).ToList();
+        return new SeparationSession(context, tasks, source);
+    }
+
+    public Task<ISeparationSession> CreateSession(Stream input, CancellationToken cancellationToken = default)
+    {
+        if (!input.CanSeek)
+        {
+            throw new InvalidOperationException(
+                "Non-seekable streams require source metadata. Use CreateSession(stream, sourceInfo).");
+        }
+
+        input.Seek(0, SeekOrigin.Begin);
+        return CreateSessionFromStreamAsync(input, sourceInfo: null, cancellationToken);
+    }
+
+    public Task<ISeparationSession> CreateSession(
+        Stream input,
+        AudioSourceInfo sourceInfo,
+        CancellationToken cancellationToken = default) =>
+        CreateSessionFromStreamAsync(input, sourceInfo, cancellationToken);
+
+    private async Task<ISeparationSession> CreateSessionFromStreamAsync(
+        Stream input,
+        AudioSourceInfo? sourceInfo,
+        CancellationToken cancellationToken)
+    {
+        var context = CreateContext();
+        context.InputStream = input;
+        context.InferenceSpec.ThrowIfNull();
+
+        var source = sourceInfo ?? await context.AudioReader.ProbeAsync(
+            input,
+            context.InferenceSpec.InputFrameCount,
+            cancellationToken);
+
+        if (input.CanSeek)
+        {
+            input.Seek(0, SeekOrigin.Begin);
+        }
 
         context.SourceInfo = source;
         ValidateSource(context, source);

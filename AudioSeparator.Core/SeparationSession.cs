@@ -3,6 +3,7 @@ using AudioSeparator.Abstractions;
 using AudioSeparator.Abstractions.Audio;
 using AudioSeparator.Abstractions.Benchmark;
 using AudioSeparator.Abstractions.Tasks;
+using AudioSeparator.Core.Audio;
 using AudioSeparator.Core.Tasks;
 
 namespace AudioSeparator.Core;
@@ -23,6 +24,7 @@ public sealed class SeparationSession : ISeparationSession
     }
 
     public AudioSourceInfo Source { get; }
+
     public IReadOnlyList<IProcessTask> Tasks => _tasks;
 
     public async Task RunTasksAsync(CancellationToken cancellationToken = default)
@@ -40,19 +42,21 @@ public sealed class SeparationSession : ISeparationSession
             throw new InvalidOperationException("Source metadata is missing.");
         }
 
+        var channels = _context.InferenceSpec?.OutputChannels ?? _context.SourceInfo.Channels;
         var outputSampleRate = _context.Requirements.SampleRate > 0
             ? _context.Requirements.SampleRate
             : _context.SourceInfo.SampleRate;
 
         var stems = new Dictionary<string, StemAudio>();
-        foreach (var (name, chunks) in _context.OutputStems)
+
+        foreach (var (name, samples) in _context.OutputStemSamples)
         {
             stems[name] = new StemAudio
             {
                 Name = name,
-                SampleRate = outputSampleRate,
-                Channels = _context.InferenceSpec?.OutputChannels ?? _context.SourceInfo.Channels,
-                Chunks = chunks
+                SampleRate = _context.Requirements.SampleRate,
+                Channels = channels,
+                Audio = StemAudioBuffer.CreatePcmStream(samples)
             };
         }
 

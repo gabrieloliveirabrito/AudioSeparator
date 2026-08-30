@@ -15,8 +15,8 @@ Modular .NET audio stem separator. The core **returns** separated audio; it neve
 ```
 Abstractions  ← contracts only, zero NuGet deps
 Core          ← pipeline, session API, tasks
-Onnx          ← InferenceSession, InferenceSpec, OnnxInferenceTask
-Onnx.Demucs   ← Demucs ONNX backend (one model implementation)
+Onnx          ← InferenceSession, OnnxContext, abstract hooks (ReadInferenceSpec, CreateInferenceTask)
+Onnx.Demucs   ← DemucsInferenceSpecReader, DemucsInferenceTask, htdemucs defaults
 FFMPEG/NAudio ← IAudioReader + write extensions (optional persistence)
 Examples      ← compose separate + write
 ```
@@ -25,9 +25,10 @@ Dependency rule: I/O plugins reference **Abstractions only**. Core never referen
 
 ## Core principle
 
-- `CreateSession(path)` → probe + validate + expose `Tasks`
-- `RunAsync()` → `SeparationResult` with `StemAudio` per stem
-- Persistence: `result.WriteToDirectoryAsync(dir, writer)` in FFMPEG/NAudio extensions
+- `CreateSession(path|stream)` → probe + validate + expose `Tasks`
+- `RunAsync()` → `SeparationResult` with PCM + optional encoded streams via writer
+- `OpenStemPcmStream` / `OpenStemEncodedStreamAsync` for raw PCM vs WAV/MP3 bytes
+- Persistence: `result.WriteToDirectoryAsync(dir)` in FFMPEG/NAudio extensions (optional writer)
 
 ## Key types
 
@@ -36,30 +37,32 @@ Dependency rule: I/O plugins reference **Abstractions only**. Core never referen
 | `InferenceSpec` | ONNX session introspection (names, dims, stems — **no sample rate**) |
 | `AudioSourceInfo` | `IAudioReader.ProbeAsync` |
 | `SeparationRequirements` | Builder: `SampleRate`, `StemNames` |
-| `StemAudio` / `SeparationResult` | Pipeline output |
+| `SeparationProcessingOptions` | Builder: `EnableOverlapAdd`, `OverlapRatio`, `OutputStemName` |
+| `StemAudio` / `SeparationResult` | Pipeline output (`StemAudio.Audio` is a ready PCM stream) |
 
 ## Session flow
 
-1. `var session = await separator.CreateSession(inputPath)`
+1. `var session = await separator.CreateSession(inputPath)` (or `CreateSession(stream, sourceInfo)`)
 2. Attach progress callbacks on `session.Tasks`
-3. `var result = await session.RunAsync()`
-4. `await result.WriteToDirectoryAsync("./Outputs", writer)` (consumer side)
+3. `using var result = await session.RunAsync()`
+4. Raw PCM: `result.OpenStemPcmStream("vocals")` or `CopyStemPcmToAsync` → `.pcm`
+5. Encoded (WAV/MP3): `await result.OpenStemEncodedStreamAsync("vocals")` or `WriteToDirectoryAsync`
+
+## Stem selection and overlap
+
+- `.WithOutputStem("vocals")` — only that stem appears in `SeparationResult.Stems`
+- `.WithOverlapAdd(enabled: true)` — overlap-add stitching (default `false`; increases inference time and CPU/GPU usage)
 
 ## I/O split
 
-- Builder: `.UseReader(...)` via `.UseNAudio()` or `.UseFFMPEG()`
-- Writer: `NAudioExtensions.CreateWriter()` / `FFMPEGExtensions.CreateWriter()` — used only when saving
+- Builder: `.UseReader(...)` or `.UseNAudio()` / `.UseFFMPEG()` (reader + optional writer)
+- Writer: used only when saving to disk via `WriteToDirectoryAsync`
 
 ## Probe vs ReadAsync
 
 - `ProbeAsync` runs once at session creation (validation, chunk count)
 - `ReadAsync` is a single data pass inside `AudioReadTask`
 - No `AudioMetadataTask` in the pipeline
-
-## Known gaps
-
-- Streaming stem output (`StemAudio.ToStream()`) is future work
-- `@Older/` is legacy reference — only read when explicitly mentioned
 
 ## Rule authoring workflow
 
