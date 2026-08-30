@@ -4,8 +4,8 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>0.1.0-beta</Version>
-    <PackageVersion>0.1.0-beta</PackageVersion>
+    <Version>0.2.0-beta</Version>
+    <PackageVersion>0.2.0-beta</PackageVersion>
     <Title>AudioSeparator.Benchmark</Title>
     <Description>Benchmark runners and reporters for AudioSeparator — warmup runs, per-phase timing, memory snapshots, and JSON/console reports.</Description>
     <PackageTags>audio;stem-separation;benchmark;performance;dotnet</PackageTags>
