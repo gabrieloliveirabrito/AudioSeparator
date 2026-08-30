@@ -15,8 +15,8 @@ Modular .NET audio stem separator. The core **returns** separated audio; it neve
 ```
 Abstractions  ← contracts only, zero NuGet deps
 Core          ← pipeline, session API, tasks
-Onnx          ← InferenceSession, InferenceSpec, OnnxInferenceTask
-Onnx.Demucs   ← Demucs ONNX backend (one model implementation)
+Onnx          ← InferenceSession, OnnxContext, abstract hooks (ReadInferenceSpec, CreateInferenceTask)
+Onnx.Demucs   ← DemucsInferenceSpecReader, DemucsInferenceTask, htdemucs defaults
 FFMPEG/NAudio ← IAudioReader + write extensions (optional persistence)
 Examples      ← compose separate + write
 ```

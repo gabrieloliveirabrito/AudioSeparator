@@ -1,15 +1,15 @@
-using System.Runtime.InteropServices;
 using AudioSeparator.Abstractions.Audio;
 using AudioSeparator.Abstractions.Extensions;
 using AudioSeparator.Abstractions.Inference;
 using AudioSeparator.Core;
 using AudioSeparator.Core.Tasks;
+using AudioSeparator.Onnx;
 using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
 
-namespace AudioSeparator.Onnx.Tasks;
+namespace AudioSeparator.Onnx.Demucs.Tasks;
 
-public class OnnxInferenceTask(OnnxContext context) : ProcessTask("Running inference")
+public class DemucsInferenceTask(OnnxContext context) : ProcessTask("Running inference")
 {
     private static readonly SemaphoreSlim RunLock = new(1, 1);
 
