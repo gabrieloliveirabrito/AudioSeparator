@@ -43,6 +43,10 @@ public sealed class SeparationSession : ISeparationSession
         }
 
         var channels = _context.InferenceSpec?.OutputChannels ?? _context.SourceInfo.Channels;
+        var outputSampleRate = _context.Requirements.SampleRate > 0
+            ? _context.Requirements.SampleRate
+            : _context.SourceInfo.SampleRate;
+
         var stems = new Dictionary<string, StemAudio>();
 
         foreach (var (name, samples) in _context.OutputStemSamples)

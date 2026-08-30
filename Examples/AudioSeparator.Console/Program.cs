@@ -14,7 +14,6 @@ public class Program
         var outputDirectory = Path.Combine(Environment.CurrentDirectory, "Outputs");
 
         var builder = DemucsBuilder.Create(modelPath)
-            .UseStemNames("drums", "bass", "other", "vocals")
             .UseFFMPEG(options =>
             {
                 options.OutputFormat = "mp3";

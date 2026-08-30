@@ -21,7 +21,7 @@ where TContext : AudioSeparatorContext
     {
         var requirements = context.Requirements;
 
-        if (source.SampleRate != requirements.SampleRate)
+        if (requirements.SampleRate > 0 && source.SampleRate != requirements.SampleRate)
         {
             throw new InvalidOperationException(
                 $"Expected sample rate {requirements.SampleRate} Hz, but the source is {source.SampleRate} Hz.");
