@@ -39,6 +39,19 @@ dotnet add package AudioSeparator.FFMPEG
 
 ---
 
+## Defaults
+
+`DemucsBuilder.Create(...)` pre-configures htdemucs requirements:
+
+| Setting | Default |
+|---------|---------|
+| Sample rate | 44100 Hz |
+| Stem names | `drums`, `bass`, `other`, `vocals` |
+
+Override with `.UseStemNames(...)` or `.WithRequirements(...)` when needed.
+
+---
+
 ## Quick start
 
 ```csharp
@@ -47,7 +60,6 @@ using AudioSeparator.Onnx.Demucs;
 using Microsoft.ML.OnnxRuntime;
 
 var builder = DemucsBuilder.Create("htdemucs.onnx")
-    .UseStemNames("drums", "bass", "other", "vocals")
     .UseNAudio()
     .ConfigureSessionOptions(options =>
     {
@@ -80,7 +92,6 @@ using AudioSeparator.FFMPEG;
 using AudioSeparator.Onnx.Demucs;
 
 var builder = DemucsBuilder.Create("htdemucs.onnx")
-    .UseStemNames("drums", "bass", "other", "vocals")
     .UseFFMPEG(options =>
     {
         options.OutputFormat = "mp3";
@@ -105,10 +116,12 @@ var builder = DemucsBuilder.Create("htdemucs.onnx")
 
 | Type | Role |
 |------|------|
-| `DemucsBuilder.Create(modelPath)` | Fluent entry point |
+| `DemucsBuilder.Create(modelPath)` | Fluent entry point with htdemucs defaults |
 | `DemucsBuilder` | Builder: `UseStemNames`, `UseAudio`, `WithRequirements`, `ConfigureSessionOptions` |
 | `DemucsSeparator` | `IAudioSeparator` implementation |
 | `DemucsContext` | ONNX runtime context for Demucs |
+| `DemucsInferenceSpecReader` | Reads htdemucs tensor layout from ONNX metadata |
+| `DemucsInferenceTask` | Chunked inference; output layout `[batch, stems, channels, frames]` |
 
 Inherited from `OnnxSeparatorBuilder`: `.UseAudio()`, `.UseStemNames()`, `.WithRequirements()`, `.ConfigureSessionOptions()`.
 

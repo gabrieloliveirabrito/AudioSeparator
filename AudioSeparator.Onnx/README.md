@@ -1,6 +1,6 @@
 # AudioSeparator.Onnx
 
-> ONNX Runtime backend for AudioSeparator — session introspection, chunked inference, and configurable execution providers.
+> ONNX Runtime backend for AudioSeparator — session lifecycle, builder hooks, and configurable execution providers.
 
 [![NuGet](https://img.shields.io/nuget/v/AudioSeparator.Onnx)](https://www.nuget.org/packages/AudioSeparator.Onnx)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
@@ -16,15 +16,15 @@
 dotnet add package AudioSeparator.Onnx
 ```
 
-> For Demucs/htdemucs models, use [AudioSeparator.Onnx.Demucs](https://www.nuget.org/packages/AudioSeparator.Onnx.Demucs) — a thin, ready-made wrapper around this package.
+> For Demucs/htdemucs models, use [AudioSeparator.Onnx.Demucs](https://www.nuget.org/packages/AudioSeparator.Onnx.Demucs) — a ready-made wrapper around this package.
 
 ---
 
 ## When to use this package
 
 - You are **authoring a custom ONNX model backend** (not Demucs).
-- You need `OnnxSeparator`, chunked `OnnxInferenceTask`, and `InferenceSpecReader`.
-- You want to configure ONNX Runtime (`SessionOptions`, CUDA, graph optimizations).
+- You need `OnnxSeparator`, `OnnxContext`, and `ConfigureSessionOptions`.
+- You implement model-specific spec reading and inference tasks via abstract hooks.
 
 End users separating audio with Demucs should prefer **Onnx.Demucs** over building on this layer directly.
 
@@ -40,8 +40,19 @@ End users separating audio with Demucs should prefer **Onnx.Demucs** over buildi
 
 ```csharp
 using AudioSeparator.Abstractions;
+using AudioSeparator.Abstractions.Inference;
+using AudioSeparator.Abstractions.Tasks;
 using AudioSeparator.Onnx;
 using Microsoft.ML.OnnxRuntime;
+
+public sealed class MyOnnxSeparator(MyOnnxBuilderContext context) : OnnxSeparator<MyOnnxContext>(context)
+{
+    protected override InferenceSpec ReadInferenceSpec(InferenceSession session)
+        => MyInferenceSpecReader.Read(session);
+
+    protected override IProcessTask CreateInferenceTask(MyOnnxContext context)
+        => new MyInferenceTask(context);
+}
 
 public sealed class MyOnnxBuilder(string modelPath) : OnnxSeparatorBuilder<MyOnnxBuilder, MyOnnxBuilderContext>
 {
@@ -57,9 +68,8 @@ public sealed class MyOnnxBuilder(string modelPath) : OnnxSeparatorBuilder<MyOnn
     }
 }
 
-// Configure CUDA and optimizations:
 var separator = MyOnnxBuilder.Create("model.onnx")
-    .UseStemNames("drums", "bass", "other", "vocals")
+    .UseStemNames("stem_a", "stem_b")
     .ConfigureSessionOptions(options =>
     {
         options.GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL;
@@ -74,9 +84,9 @@ var separator = MyOnnxBuilder.Create("model.onnx")
 
 | Step | Component | What happens |
 |------|-----------|--------------|
-| 1 | `OnnxSeparator.CreateContext` | Load `InferenceSession`, introspect via `InferenceSpecReader` |
+| 1 | `OnnxSeparator.CreateContext` | Load `InferenceSession`, call `ReadInferenceSpec` |
 | 2 | `AudioReadTask` | Decode input into chunks |
-| 3 | `OnnxInferenceTask` | Chunked inference; output layout `[batch, stems, channels, frames]` |
+| 3 | `CreateInferenceTask` | Model-specific chunked inference (implemented by subclass) |
 | 4 | `RunAsync` | `SeparationResult` with per-stem `StemAudio` |
 
 ---
@@ -85,12 +95,12 @@ var separator = MyOnnxBuilder.Create("model.onnx")
 
 | Type | Role |
 |------|------|
-| `OnnxSeparator<TContext>` | Extends `AudioSeparatorBase`; wires read + ONNX inference tasks |
+| `OnnxSeparator<TContext>` | Extends `AudioSeparatorBase`; abstract hooks for spec + inference |
 | `OnnxSeparatorBuilder<TBuilder, TContext>` | Adds `ConfigureSessionOptions(Action<SessionOptions>)` |
 | `OnnxSeparatorBuilderContext` | `ModelPath`, `ConfigureSession` callback |
 | `OnnxContext` | Holds `InferenceSession`; sets disposable resource |
-| `InferenceSpecReader.Read(session)` | Maps ONNX metadata → `InferenceSpec` |
-| `OnnxInferenceTask` | Chunked inference task |
+| `ReadInferenceSpec(session)` | **Abstract** — map ONNX metadata → `InferenceSpec` |
+| `CreateInferenceTask(context)` | **Abstract** — return model-specific inference task |
 
 ---
 

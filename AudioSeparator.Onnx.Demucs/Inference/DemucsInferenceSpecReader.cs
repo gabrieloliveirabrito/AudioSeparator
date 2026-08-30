@@ -1,9 +1,9 @@
 using AudioSeparator.Abstractions.Inference;
 using Microsoft.ML.OnnxRuntime;
 
-namespace AudioSeparator.Onnx;
+namespace AudioSeparator.Onnx.Demucs.Inference;
 
-public static class InferenceSpecReader
+public static class DemucsInferenceSpecReader
 {
     public static InferenceSpec Read(InferenceSession session)
     {

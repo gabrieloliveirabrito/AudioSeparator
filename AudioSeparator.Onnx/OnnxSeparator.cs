@@ -1,8 +1,8 @@
 using AudioSeparator.Abstractions.Extensions;
+using AudioSeparator.Abstractions.Inference;
 using AudioSeparator.Abstractions.Tasks;
 using AudioSeparator.Core;
 using AudioSeparator.Core.Tasks;
-using AudioSeparator.Onnx.Tasks;
 using Microsoft.ML.OnnxRuntime;
 
 namespace AudioSeparator.Onnx;
@@ -20,7 +20,7 @@ where TContext : OnnxContext
         OnnxBuilderContext.ConfigureSession?.Invoke(options);
 
         var session = new InferenceSession(OnnxBuilderContext.ModelPath, options);
-        var inferenceSpec = InferenceSpecReader.Read(session);
+        var inferenceSpec = ReadInferenceSpec(session);
 
         return (TContext)Activator.CreateInstance(
             typeof(TContext),
@@ -29,9 +29,13 @@ where TContext : OnnxContext
             inferenceSpec)!;
     }
 
+    protected abstract InferenceSpec ReadInferenceSpec(InferenceSession session);
+
     protected override IEnumerable<IProcessTask> CreateProcessesTask(TContext context)
     {
         yield return new AudioReadTask(context);
-        yield return new OnnxInferenceTask(context);
+        yield return CreateInferenceTask(context);
     }
+
+    protected abstract IProcessTask CreateInferenceTask(TContext context);
 }

@@ -6,8 +6,7 @@ alwaysApply: false
 
 # ONNX Layer
 
-- ONNX-specific code lives in `AudioSeparator.Onnx`, not Core
-- `InferenceSpecReader` introspects session input/output metadata
-- `OnnxInferenceTask` runs chunked inference; output layout `[batch, stems, channels, frames]`
+- ONNX infrastructure lives in `AudioSeparator.Onnx`, not Core
+- `OnnxSeparator` exposes abstract hooks: `ReadInferenceSpec`, `CreateInferenceTask`
 - Sample rate comes from `SeparationRequirements`, not from the ONNX model
-- Demucs backend: `AudioSeparator.Onnx.Demucs` — one model, not the project name
+- Demucs backend: `AudioSeparator.Onnx.Demucs` — `DemucsInferenceSpecReader`, `DemucsInferenceTask`
