@@ -6,7 +6,10 @@
     <Nullable>enable</Nullable>
     <Version>0.1.0-beta</Version>
     <PackageVersion>0.1.0-beta</PackageVersion>
-    <Description>Benchmark runners and reporters for measuring AudioSeparator separation performance.</Description>
+    <Title>AudioSeparator.Benchmark</Title>
+    <Description>Benchmark runners and reporters for AudioSeparator — warmup runs, per-phase timing, memory snapshots, and JSON/console reports.</Description>
+    <PackageTags>audio;stem-separation;benchmark;performance;dotnet</PackageTags>
+    <PackageProjectUrl>https://github.com/gabrieloliveirabrito/AudioSeparator/tree/main/AudioSeparator.Benchmark</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>
