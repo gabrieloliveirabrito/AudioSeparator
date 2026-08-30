@@ -53,6 +53,12 @@ public static class SeparationBenchmarkRunner
 
         if (!string.IsNullOrWhiteSpace(options.OutputDirectory))
         {
+            if (result.Writer is null)
+            {
+                throw new InvalidOperationException(
+                    "A writer is required when OutputDirectory is set. Configure one with UseAudio or UseNAudio/UseFFMPEG.");
+            }
+
             Directory.CreateDirectory(options.OutputDirectory);
 
             foreach (var (name, stem) in result.Stems)

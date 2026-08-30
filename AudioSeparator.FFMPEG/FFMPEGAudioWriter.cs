@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using AudioSeparator.Abstractions;
 using AudioSeparator.Abstractions.Audio;
 
@@ -8,6 +7,7 @@ namespace AudioSeparator.FFMPEG;
 public class FFMPEGAudioWriter(string ffmpegPath, Entities.FFMPEGSettings settings) : IAudioWriter
 {
     public string PreferredExtension => settings.OutputFormat;
+
     public async Task WriteAsync(Stream destination, StemAudio stem, CancellationToken cancellationToken = default)
     {
         var psi = new ProcessStartInfo
@@ -27,12 +27,10 @@ public class FFMPEGAudioWriter(string ffmpegPath, Entities.FFMPEGSettings settin
         {
             try
             {
-                foreach (var chunk in stem.Chunks.OrderBy(c => c.Index))
-                {
-                    var buffer = MemoryMarshal.AsBytes(chunk.Samples.Span).ToArray();
-                    await process.StandardInput.BaseStream.WriteAsync(buffer, cancellationToken);
-                }
-
+                await StemAudioStream.CopyPcmToAsync(
+                    stem.Audio,
+                    process.StandardInput.BaseStream,
+                    cancellationToken);
                 await process.StandardInput.BaseStream.FlushAsync(cancellationToken);
             }
             finally
@@ -69,7 +67,7 @@ public class FFMPEGAudioWriter(string ffmpegPath, Entities.FFMPEGSettings settin
 
     public async Task WriteAsync(string fileName, StemAudio stem, CancellationToken cancellationToken = default)
     {
-        await using var fileStream = File.Open(fileName, FileMode.Create);
+        await using var fileStream = File.Create(fileName);
         await WriteAsync(fileStream, stem, cancellationToken);
     }
 }

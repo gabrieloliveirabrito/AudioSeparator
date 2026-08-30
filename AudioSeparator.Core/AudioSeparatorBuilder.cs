@@ -16,17 +16,21 @@ where TContext : AudioSeparatorBuilderContext
     }
 
     protected abstract TContext CreateContext();
+
     public abstract IAudioSeparator Build();
 
-    protected virtual TBuilder CastThis()
-    {
-        return (TBuilder)this;
-    }
+    protected virtual TBuilder CastThis() => (TBuilder)this;
 
     public virtual TBuilder UseAudio(IAudioReader reader, IAudioWriter writer)
     {
         Context.AudioReader = reader;
         Context.AudioWriter = writer;
+        return CastThis();
+    }
+
+    public virtual TBuilder UseReader(IAudioReader reader)
+    {
+        Context.AudioReader = reader;
         return CastThis();
     }
 
@@ -39,6 +43,25 @@ where TContext : AudioSeparatorBuilderContext
     public virtual TBuilder WithRequirements(SeparationRequirements requirements)
     {
         Context.Requirements = requirements;
+        return CastThis();
+    }
+
+    public virtual TBuilder WithProcessingOptions(SeparationProcessingOptions options)
+    {
+        Context.ProcessingOptions = options;
+        return CastThis();
+    }
+
+    public virtual TBuilder WithOutputStem(string stemName)
+    {
+        Context.ProcessingOptions.OutputStemName = stemName;
+        return CastThis();
+    }
+
+    public virtual TBuilder WithOverlapAdd(bool enabled = true, float overlapRatio = 0.25f)
+    {
+        Context.ProcessingOptions.EnableOverlapAdd = enabled;
+        Context.ProcessingOptions.OverlapRatio = overlapRatio;
         return CastThis();
     }
 }

@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using AudioSeparator.Abstractions;
 using AudioSeparator.Abstractions.Audio;
 using NAudio.Utils;
@@ -8,6 +9,7 @@ namespace AudioSeparator.NAudio;
 public class NAudioWriter : IAudioWriter
 {
     public string PreferredExtension => "wav";
+
     public Task WriteAsync(Stream destination, StemAudio stem, CancellationToken cancellationToken = default)
     {
         var waveFormat = WaveFormat.CreateIeeeFloatWaveFormat(stem.SampleRate, stem.Channels);
@@ -15,15 +17,11 @@ public class NAudioWriter : IAudioWriter
         using var ignoreDispose = new IgnoreDisposeStream(destination);
         using var wavStream = new WaveFileWriter(ignoreDispose, waveFormat);
 
-        foreach (var chunk in stem.Chunks.OrderBy(c => c.Index))
+        var pcmBytes = StemAudioStream.ReadPcmBytes(stem.Audio);
+        var samples = MemoryMarshal.Cast<byte, float>(pcmBytes.AsSpan());
+        foreach (var sample in samples)
         {
-            for (var sampleIndex = 0; sampleIndex < chunk.Samples.Length; sampleIndex += stem.Channels)
-            {
-                for (var channelIndex = 0; channelIndex < stem.Channels; channelIndex++)
-                {
-                    wavStream.WriteSample(chunk.Samples.Span[sampleIndex + channelIndex]);
-                }
-            }
+            wavStream.WriteSample(sample);
         }
 
         return Task.CompletedTask;

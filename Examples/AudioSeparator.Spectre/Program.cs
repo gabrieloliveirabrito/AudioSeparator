@@ -1,6 +1,6 @@
 ﻿using AudioSeparator.Abstractions;
-using AudioSeparator.NAudio;
 using AudioSeparator.FFMPEG;
+using AudioSeparator.NAudio;
 using AudioSeparator.Onnx.Demucs;
 using Microsoft.ML.OnnxRuntime;
 using Spectre.Console;
@@ -11,11 +11,13 @@ var outputDirectory = Path.Combine(Environment.CurrentDirectory, "Outputs");
 
 var builder = DemucsBuilder.Create(modelPath)
     .UseStemNames("drums", "bass", "other", "vocals")
-    //.UseNAudio()
-    .UseFFMPEG(options => {
+    .WithOutputStem("vocals")
+    .UseFFMPEG(options =>
+    {
         options.OutputFormat = "mp3";
         options.OutputCodec = "libmp3lame";
     })
+    .WithOverlapAdd()
     .ConfigureSessionOptions(options =>
     {
         options.GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL;
@@ -42,8 +44,18 @@ await AnsiConsole.Progress().StartAsync(async ctx =>
         });
     }
 
-    var result = await session.RunAsync();
-    await result.WriteToDirectoryAsync(outputDirectory);
+    var filePath = Path.Combine(outputDirectory, "vocals.mp3");
+    if (File.Exists(filePath))
+    {
+        File.Delete(filePath);
+    }
 
-    AnsiConsole.MarkupLine($"[green]Wrote {result.Stems.Count} stems to {outputDirectory}[/]");
+    using var result = await session.RunAsync();
+    using var file = File.Create(filePath);
+
+    await using var encoded = await result.OpenStemEncodedStreamAsync("vocals");
+    await encoded.CopyToAsync(file);
+
+    var extension = result.Writer?.PreferredExtension ?? "wav";
+    AnsiConsole.MarkupLine($"[green]Done[/]");
 });
