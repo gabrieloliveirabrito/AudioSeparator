@@ -33,7 +33,7 @@ public class Program
             global::System.Console.WriteLine(task.Description);
         }
 
-        var result = await session.RunAsync();
+        using var result = await session.RunAsync();
         await result.WriteToDirectoryAsync(outputDirectory);
 
         foreach (var (name, stem) in result.Stems)
