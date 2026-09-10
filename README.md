@@ -1,5 +1,7 @@
 # AudioSeparator
 
+![AudioSeparator](assets/readme-banner.png)
+
 > Modular .NET library for audio stem separation — pluggable readers (NAudio, FFMPEG), ONNX backends (Demucs/htdemucs), and optional write extensions.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
