@@ -20,4 +20,9 @@ public interface IAudioSeparatorContext
     SeparationProcessingOptions ProcessingOptions { get; set; }
 
     Dictionary<string, float[]> OutputStemSamples { get; set; }
+
+    /// <summary>
+    /// Peak absolute value of input before peak-normalize (1 when disabled).
+    /// </summary>
+    float InputPeakScale { get; set; }
 }

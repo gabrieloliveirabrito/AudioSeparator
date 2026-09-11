@@ -5,7 +5,7 @@ alwaysApply: true
 
 # AudioSeparator
 
-Modular .NET audio stem separator. Packages: `AudioSeparator.Abstractions`, `.Core`, `.Onnx`, `.Onnx.Demucs`, `.FFMPEG`, `.NAudio`.
+Modular .NET audio stem separator. Packages: `AudioSeparator.Abstractions`, `.Core`, `.Onnx`, `.Onnx.Demucs`, `.Onnx.Mdx`, `.FFMPEG`, `.NAudio`.
 
 ## Dependency direction
 
@@ -16,6 +16,7 @@ Modular .NET audio stem separator. Packages: `AudioSeparator.Abstractions`, `.Co
 
 - Separator **returns** `SeparationResult`; never use `IAudioWriter` in Core or Onnx
 - Use `CreateSession` + `RunAsync`, not legacy `Separate()`
+- Audio conditioning (resample, peak normalize, clip prevention) runs in Core on PCM
 - Never read or edit paths in `.gitignore` / `.cursorignore`
 - Do not scan the entire repo unless the user `@`-mentions a folder
 - `@Older/` only when explicitly requested

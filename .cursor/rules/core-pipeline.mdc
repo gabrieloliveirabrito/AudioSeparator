@@ -9,5 +9,5 @@ alwaysApply: false
 - `AudioSeparatorBase`: `CreateSession` probes source, validates, builds task list
 - `SeparationSession.RunAsync` executes tasks sequentially, returns `SeparationResult`
 - Tasks inherit `ProcessTask`; shared state in `AudioSeparatorContext`
-- Pipeline: Read → Infer (Onnx). No write task in Core
+- Pipeline: Read → Prepare (DSP) → Infer → Postprocess. No write task in Core
 - `OutputStems` keyed by stem name; materialized as `StemAudio` in the result

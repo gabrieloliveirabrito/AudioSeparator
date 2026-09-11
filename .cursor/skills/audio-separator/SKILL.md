@@ -14,14 +14,15 @@ Modular .NET audio stem separator. The core **returns** separated audio; it neve
 
 ```
 Abstractions  ← contracts only, zero NuGet deps
-Core          ← pipeline, session API, tasks
+Core          ← pipeline, session API, tasks, PCM DSP (resample/peak/clip)
 Onnx          ← InferenceSession, OnnxContext, abstract hooks (ReadInferenceSpec, CreateInferenceTask)
 Onnx.Demucs   ← DemucsInferenceSpecReader, DemucsInferenceTask, htdemucs defaults
+Onnx.Mdx      ← MdxStft, MdxInferenceTask, UVR-MDX-NET-Inst_HQ_5 defaults
 FFMPEG/NAudio ← IAudioReader + write extensions (optional persistence)
 Examples      ← compose separate + write
 ```
 
-Dependency rule: I/O plugins reference **Abstractions only**. Core never references FFMPEG, NAudio, or writers.
+Dependency rule: I/O plugins reference **Abstractions only**. Core never references FFMPEG, NAudio, or writers. DSP runs in Core on `InputSamples` / stems.
 
 ## Core principle
 
@@ -29,6 +30,7 @@ Dependency rule: I/O plugins reference **Abstractions only**. Core never referen
 - `RunAsync()` → `SeparationResult` with PCM + optional encoded streams via writer
 - `OpenStemPcmStream` / `OpenStemEncodedStreamAsync` for raw PCM vs WAV/MP3 bytes
 - Persistence: `result.WriteToDirectoryAsync(dir)` in FFMPEG/NAudio extensions (optional writer)
+- Pipeline tasks: `AudioReadTask` → `AudioPrepareTask` → inference → `AudioPostprocessTask`
 
 ## Key types
 
@@ -37,7 +39,8 @@ Dependency rule: I/O plugins reference **Abstractions only**. Core never referen
 | `InferenceSpec` | ONNX session introspection (names, dims, stems — **no sample rate**) |
 | `AudioSourceInfo` | `IAudioReader.ProbeAsync` |
 | `SeparationRequirements` | Builder: `SampleRate`, `StemNames` |
-| `SeparationProcessingOptions` | Builder: `EnableOverlapAdd`, `OverlapRatio`, `OutputStemName` |
+| `SeparationProcessingOptions` | Overlap, stem filter, resample, peak normalize, clip prevention |
+| `ClipPreventMode` | `None` / `Rescale` / `Clamp` / `Tanh` |
 | `StemAudio` / `SeparationResult` | Pipeline output (`StemAudio.Audio` is a ready PCM stream) |
 
 ## Session flow
@@ -48,10 +51,13 @@ Dependency rule: I/O plugins reference **Abstractions only**. Core never referen
 4. Raw PCM: `result.OpenStemPcmStream("vocals")` or `CopyStemPcmToAsync` → `.pcm`
 5. Encoded (WAV/MP3): `await result.OpenStemEncodedStreamAsync("vocals")` or `WriteToDirectoryAsync`
 
-## Stem selection and overlap
+## Stem selection, overlap, conditioning
 
 - `.WithOutputStem("vocals")` — only that stem appears in `SeparationResult.Stems`
-- `.WithOverlapAdd(enabled: true)` — overlap-add stitching (default `false`; increases inference time and CPU/GPU usage)
+- `.WithOverlapAdd(enabled: true)` — overlap-add stitching (Demucs default `false`; MDX default `true`)
+- `.WithResample(true)` — Core resamples to `Requirements.SampleRate` (default on)
+- `.WithPeakNormalize(true)` — MDX default on; restores scale on stems
+- `.WithClipPrevention(ClipPreventMode.Rescale)` — Demucs-style prevent_clip on stems
 
 ## I/O split
 

@@ -9,4 +9,6 @@ alwaysApply: false
 - ONNX infrastructure lives in `AudioSeparator.Onnx`, not Core
 - `OnnxSeparator` exposes abstract hooks: `ReadInferenceSpec`, `CreateInferenceTask`
 - Sample rate comes from `SeparationRequirements`, not from the ONNX model
-- Demucs backend: `AudioSeparator.Onnx.Demucs` — `DemucsInferenceSpecReader`, `DemucsInferenceTask`
+- Demucs backend: `AudioSeparator.Onnx.Demucs` — waveform I/O
+- MDX backend: `AudioSeparator.Onnx.Mdx` — host STFT + spectrogram I/O (Inst_HQ_5 defaults)
+- DSP (resample, peak normalize, clip prevention) lives in Core, not NAudio/FFMPEG
