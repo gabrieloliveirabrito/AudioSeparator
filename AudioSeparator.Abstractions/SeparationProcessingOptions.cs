@@ -14,6 +14,22 @@ public sealed class SeparationProcessingOptions
     /// </summary>
     public string? OutputStemName { get; set; }
 
+    /// <summary>
+    /// When true and <see cref="SeparationRequirements.SampleRate"/> is set, resample
+    /// source PCM in Core to the required rate instead of failing validation.
+    /// </summary>
+    public bool EnableResample { get; set; } = true;
+
+    /// <summary>
+    /// Peak-normalize input before inference and restore scale on output stems.
+    /// </summary>
+    public bool EnablePeakNormalize { get; set; }
+
+    /// <summary>
+    /// Applied to materialized stems after inference (and after peak restore).
+    /// </summary>
+    public ClipPreventMode ClipPreventMode { get; set; } = ClipPreventMode.Rescale;
+
     public void Validate()
     {
         if (!EnableOverlapAdd)

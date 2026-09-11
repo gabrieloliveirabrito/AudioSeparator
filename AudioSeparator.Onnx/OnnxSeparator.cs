@@ -34,7 +34,9 @@ where TContext : OnnxContext
     protected override IEnumerable<IProcessTask> CreateProcessesTask(TContext context)
     {
         yield return new AudioReadTask(context);
+        yield return new AudioPrepareTask(context);
         yield return CreateInferenceTask(context);
+        yield return new AudioPostprocessTask(context);
     }
 
     protected abstract IProcessTask CreateInferenceTask(TContext context);

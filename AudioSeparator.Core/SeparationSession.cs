@@ -54,7 +54,7 @@ public sealed class SeparationSession : ISeparationSession
             stems[name] = new StemAudio
             {
                 Name = name,
-                SampleRate = _context.Requirements.SampleRate,
+                SampleRate = outputSampleRate,
                 Channels = channels,
                 Audio = StemAudioBuffer.CreatePcmStream(samples)
             };
@@ -142,9 +142,12 @@ public sealed class SeparationSession : ISeparationSession
     }
 
     private static SeparationBenchmarkPhase ResolvePhase(IProcessTask task) =>
-        task is AudioReadTask
-            ? SeparationBenchmarkPhase.AudioRead
-            : SeparationBenchmarkPhase.Inference;
+        task switch
+        {
+            AudioReadTask or AudioPrepareTask => SeparationBenchmarkPhase.AudioRead,
+            AudioPostprocessTask => SeparationBenchmarkPhase.ResultAssembly,
+            _ => SeparationBenchmarkPhase.Inference
+        };
 
     private static (long ManagedBytes, long WorkingSetBytes) CaptureMemorySnapshot()
     {

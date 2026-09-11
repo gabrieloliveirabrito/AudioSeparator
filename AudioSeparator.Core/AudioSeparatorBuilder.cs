@@ -64,4 +64,22 @@ where TContext : AudioSeparatorBuilderContext
         Context.ProcessingOptions.OverlapRatio = overlapRatio;
         return CastThis();
     }
+
+    public virtual TBuilder WithResample(bool enabled = true)
+    {
+        Context.ProcessingOptions.EnableResample = enabled;
+        return CastThis();
+    }
+
+    public virtual TBuilder WithPeakNormalize(bool enabled = true)
+    {
+        Context.ProcessingOptions.EnablePeakNormalize = enabled;
+        return CastThis();
+    }
+
+    public virtual TBuilder WithClipPrevention(ClipPreventMode mode)
+    {
+        Context.ProcessingOptions.ClipPreventMode = mode;
+        return CastThis();
+    }
 }

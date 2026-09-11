@@ -36,5 +36,7 @@ public class AudioSeparatorContext : IAudioSeparatorContext
 
     public Dictionary<string, float[]> OutputStemSamples { get; set; } = [];
 
+    public float InputPeakScale { get; set; } = 1f;
+
     public IDisposable? DisposableResource { get; set; }
 }
