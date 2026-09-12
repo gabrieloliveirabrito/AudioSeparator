@@ -113,6 +113,10 @@ sh restore-all.sh
 sh build-all.sh
 ```
 
+## Release
+
+Shared package version lives in [`Directory.Build.props`](Directory.Build.props) (`Version` / `PackageVersion`). PRs into `main` must bump it above the latest `v*` tag (NuGet SemVer, including `-beta`). After merge, create a GitHub Release with tag `v{Version}` to trigger NuGet publish.
+
 ---
 
 ## Examples

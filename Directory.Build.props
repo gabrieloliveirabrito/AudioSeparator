@@ -1,5 +1,7 @@
 <Project>
   <PropertyGroup>
+    <Version>0.2.0-beta</Version>
+    <PackageVersion>0.2.0-beta</PackageVersion>
     <Authors>Gabriel Oliveira Brito</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/gabrieloliveirabrito/AudioSeparator</RepositoryUrl>
