@@ -1,6 +1,8 @@
 # AudioSeparator
 
-> Modular .NET library for audio stem separation — pluggable readers (NAudio, FFMPEG), ONNX backends (Demucs/htdemucs), and optional write extensions.
+![AudioSeparator](assets/readme-banner.png)
+
+> Modular .NET library for audio stem separation — pluggable readers (NAudio, FFMPEG), ONNX backends (Demucs/htdemucs, MDX-Net), and optional write extensions.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![.NET](https://img.shields.io/badge/.NET-10.0-512BD4)](https://dotnet.microsoft.com/)
@@ -14,6 +16,7 @@ Separate audio into stems (drums, bass, vocals, other) using ONNX models. The li
 | Package | NuGet | README |
 |---------|-------|--------|
 | **AudioSeparator.Onnx.Demucs** | [nuget.org](https://www.nuget.org/packages/AudioSeparator.Onnx.Demucs) | [README](AudioSeparator.Onnx.Demucs/README.md) |
+| **AudioSeparator.Onnx.Mdx** | [nuget.org](https://www.nuget.org/packages/AudioSeparator.Onnx.Mdx) | [README](AudioSeparator.Onnx.Mdx/README.md) |
 | AudioSeparator.Abstractions | [nuget.org](https://www.nuget.org/packages/AudioSeparator.Abstractions) | [README](AudioSeparator.Abstractions/README.md) |
 | AudioSeparator.Core | [nuget.org](https://www.nuget.org/packages/AudioSeparator.Core) | [README](AudioSeparator.Core/README.md) |
 | AudioSeparator.Onnx | [nuget.org](https://www.nuget.org/packages/AudioSeparator.Onnx) | [README](AudioSeparator.Onnx/README.md) |
@@ -21,7 +24,7 @@ Separate audio into stems (drums, bass, vocals, other) using ONNX models. The li
 | AudioSeparator.FFMPEG | [nuget.org](https://www.nuget.org/packages/AudioSeparator.FFMPEG) | [README](AudioSeparator.FFMPEG/README.md) |
 | AudioSeparator.Benchmark | [nuget.org](https://www.nuget.org/packages/AudioSeparator.Benchmark) | [README](AudioSeparator.Benchmark/README.md) |
 
-**Start here:** [AudioSeparator.Onnx.Demucs](AudioSeparator.Onnx.Demucs/README.md) for end-user separation.
+**Start here:** [AudioSeparator.Onnx.Demucs](AudioSeparator.Onnx.Demucs/README.md) for 4-stem Demucs, or [AudioSeparator.Onnx.Mdx](AudioSeparator.Onnx.Mdx/README.md) for instrumental/vocals MDX-Net.
 
 ---
 
@@ -29,18 +32,20 @@ Separate audio into stems (drums, bass, vocals, other) using ONNX models. The li
 
 ```
 Abstractions  ← contracts only, zero NuGet deps
-Core          ← pipeline, session API, tasks
+Core          ← pipeline, session API, tasks, PCM DSP
 Onnx          ← InferenceSession, InferenceSpec, OnnxInferenceTask
 Onnx.Demucs   ← Demucs ONNX backend
+Onnx.Mdx      ← MDX-Net ONNX backend (host STFT)
 FFMPEG/NAudio ← IAudioReader + write extensions (optional persistence)
 ```
 
 | Layer | Responsibility |
 |-------|----------------|
 | Abstractions | Interfaces, DTOs, result extensions |
-| Core | `CreateSession` → probe → `RunAsync` → `SeparationResult` |
+| Core | `CreateSession` → probe → prepare → `RunAsync` → `SeparationResult` |
 | Onnx | Generic ONNX inference pipeline |
 | Onnx.Demucs | Demucs/htdemucs entry point |
+| Onnx.Mdx | UVR MDX-Net (instrumental/vocals) |
 | NAudio / FFMPEG | Read input, write stems to disk |
 
 The separator **returns** separated stems. Writing files uses `WriteToDirectoryAsync` after `RunAsync`, via the writer registered at build time.
