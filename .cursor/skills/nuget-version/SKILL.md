@@ -62,7 +62,7 @@ NuGet order examples: `0.2.0-beta` &lt; `0.2.0-beta.1` &lt; `0.2.0-beta.2` &lt; 
 CI job `version-gate` (see `.github/workflows/dotnet.yml`) runs on PRs/pushes to `main` and executes:
 
 ```bash
-sh scripts/check-version-bump.sh
+bash scripts/check-version-bump.sh
 ```
 
 The script requires `Directory.Build.props` `Version` to be **strictly greater** than the latest git tag `v*` (NuGet SemVer via `scripts/CompareNuGetVersions.cs`). Equal or lower versions fail the check.
@@ -95,7 +95,7 @@ When adding a package such as `AudioSeparator.Onnx.Mdx`:
 
 ```
 - [ ] Bumped Version + PackageVersion in Directory.Build.props (same value)
-- [ ] sh scripts/check-version-bump.sh passes against latest v* tags
+- [ ] bash scripts/check-version-bump.sh passes against latest v* tags
 - [ ] New packages: package README, root README, nuget-publish.yml, this table
 - [ ] Examples still use ProjectReference (IsPackable=false where needed)
 - [ ] build-all.sh passes
@@ -112,7 +112,7 @@ grep -E '<Version>|<PackageVersion>' Directory.Build.props
 Local gate (needs `git fetch --tags`):
 
 ```bash
-sh scripts/check-version-bump.sh
+bash scripts/check-version-bump.sh
 ```
 
 Pack a single package (from repo root):
