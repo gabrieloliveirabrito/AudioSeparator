@@ -115,7 +115,9 @@ sh build-all.sh
 
 ## Release
 
-Shared package version lives in [`Directory.Build.props`](Directory.Build.props) (`Version` / `PackageVersion`). PRs into `main` must bump it above the latest `v*` tag (NuGet SemVer, including `-beta`). After merge, create a GitHub Release with tag `v{Version}` to trigger NuGet publish.
+Shared package version is the root [`VERSION`](VERSION) file (`Directory.Build.props` reads it). PRs into `main` must bump it above the latest `v*` tag (NuGet SemVer, including `-beta`). After merge, create a GitHub Release with tag `v{VERSION}` to trigger NuGet publish.
+
+For direct pushes to `main`, enable repo hooks once: `git config core.hooksPath .githooks` (auto-bumps `VERSION` when it is missing from the push).
 
 ---
 

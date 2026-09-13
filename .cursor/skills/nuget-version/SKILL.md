@@ -27,21 +27,18 @@ Examples (`Examples/*`) are never versioned for NuGet.
 
 ## Unified version (release train)
 
-All publishable packages share one version from repo-root `Directory.Build.props`:
+Source of truth is the repo-root [`VERSION`](VERSION) file. `Directory.Build.props` reads it into `Version` / `PackageVersion` for all projects.
 
-```xml
-<PropertyGroup>
-  <Version>0.2.0-beta</Version>
-  <PackageVersion>0.2.0-beta</PackageVersion>
-  <!-- Authors, RepositoryUrl, PackageLicenseExpression, PackageIcon, … -->
-</PropertyGroup>
+```text
+VERSION                 →  0.2.0-beta.1
+Directory.Build.props   →  reads VERSION (do not hardcode Version here)
 ```
 
-Do **not** set `Version` / `PackageVersion` in individual publishable csproj files. Keep them equal in `Directory.Build.props`.
+Do **not** set `Version` / `PackageVersion` in individual publishable csproj files.
 
 ## When to bump
 
-Apply [SemVer 2.0](https://semver.org/) / NuGet SemVer to the **shared** version for the release train:
+Apply [SemVer 2.0](https://semver.org/) / NuGet SemVer to **VERSION**:
 
 | Change type | Bump | Examples |
 |-------------|------|----------|
@@ -49,82 +46,83 @@ Apply [SemVer 2.0](https://semver.org/) / NuGet SemVer to the **shared** version
 | New feature, backward compatible | **Minor** | Add overload, new extension method, new publishable package |
 | Bug fix, internal refactor | **Patch** | FFMPEG pipe fix, CUDA example fix |
 
-### Prerelease (`-beta`)
+### Prerelease (`-beta`) and auto-bump
 
-NuGet order examples: `0.2.0-beta` &lt; `0.2.0-beta.1` &lt; `0.2.0-beta.2` &lt; `0.2.0`.
+NuGet order: `0.2.0-beta` &lt; `0.2.0-beta.1` &lt; `0.2.0-beta.2` &lt; `0.2.0`.
 
-- First public train can ship as `0.2.0-beta`.
-- Each subsequent merge to `main` while still prerelease must bump (e.g. `0.2.0-beta` → `0.2.0-beta.1`).
-- Leaving beta: `0.2.0-beta.N` → `0.2.0`.
+Auto-bump (`bash scripts/bump-version.sh` / main pre-push):
+
+- Prerelease: `0.2.0-beta` → `0.2.0-beta.1` → `0.2.0-beta.2`
+- Stable: `0.2.0` → `0.2.1`
+
+Leaving beta manually: set `VERSION` to `0.2.0` (or next minor/major).
 
 ## Gate on `main`
 
-CI job `version-gate` (see `.github/workflows/dotnet.yml`) runs on PRs/pushes to `main` and executes:
+CI job `version-gate` runs on PRs/pushes to `main`:
 
 ```bash
 bash scripts/check-version-bump.sh
 ```
 
-The script requires `Directory.Build.props` `Version` to be **strictly greater** than the latest git tag `v*` (NuGet SemVer via `scripts/CompareNuGetVersions.cs`). Equal or lower versions fail the check.
-
-Bootstrap (no tags yet): create the first tag on `main` matching the current props version, e.g. `v0.2.0-beta`, then bump before the next PR into `main`.
+Requires root `VERSION` to be **strictly greater** than the latest git tag `v*`.
 
 PRs into `development` do **not** require a version bump.
 
+## Pre-push hook (direct pushes to `main`)
+
+Repo hooks live in [`.githooks/`](.githooks/). Enable once per clone:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+On `git push` targeting `refs/heads/main`:
+
+- If `VERSION` **is** in the commits being pushed → no auto-bump; run the SemVer gate.
+- If `VERSION` **is not** in those commits → run `scripts/bump-version.sh`, abort the push, and ask you to commit `VERSION` and push again.
+
+GitHub PR merges into `main` do **not** run this hook — edit `VERSION` (or run `bump-version.sh`) on `development` before the release PR. CI still enforces the gate.
+
 ## Release flow
 
-1. On `development`, bump `Version` and `PackageVersion` in `Directory.Build.props` (same string).
-2. Open PR `development` → `main` (`gh pr create --base main` only for release merges).
+1. On `development`, set `VERSION` above the latest `v*` tag (edit by hand or `bash scripts/bump-version.sh`).
+2. Open PR `development` → `main`.
 3. `version-gate` must pass.
-4. After merge, **manually** create a GitHub Release with tag `v{Version}` identical to props (e.g. `v0.2.0-beta.1`).
-5. `nuget-publish.yml` runs on `release: published` and packs/pushes all publishable projects (including Onnx.Mdx).
-
-Publish remains release-triggered / `workflow_dispatch`; version on `main` must already be unique vs prior tags to avoid NuGet conflicts.
+4. After merge, create a GitHub Release with tag `v{VERSION}` (e.g. `v0.2.0-beta.2`).
+5. `nuget-publish.yml` packs/pushes all publishable projects (including Onnx.Mdx).
 
 ## New publishable package checklist
 
-When adding a package such as `AudioSeparator.Onnx.Mdx`:
-
-- [ ] Package `README.md` (picked up by `Directory.Build.props` `PackageReadmeFile`)
+- [ ] Package `README.md` (via `Directory.Build.props` `PackageReadmeFile`)
 - [ ] Row + architecture blurb in repo-root `README.md`
 - [ ] Entry in `.github/workflows/nuget-publish.yml` pack list
 - [ ] Row in this skill’s publishable table
-- [ ] Bump shared `Version` / `PackageVersion` if the package ships in the next `main` release
+- [ ] Bump `VERSION` if the package ships in the next `main` release
 
 ## Checklist (before release PR)
 
 ```
-- [ ] Bumped Version + PackageVersion in Directory.Build.props (same value)
-- [ ] bash scripts/check-version-bump.sh passes against latest v* tags
+- [ ] VERSION bumped above latest v* tag
+- [ ] bash scripts/check-version-bump.sh passes
 - [ ] New packages: package README, root README, nuget-publish.yml, this table
 - [ ] Examples still use ProjectReference (IsPackable=false where needed)
 - [ ] build-all.sh passes
+- [ ] git config core.hooksPath .githooks (local clones that push to main)
 ```
 
 ## Commands
 
-Current shared version:
-
 ```bash
-grep -E '<Version>|<PackageVersion>' Directory.Build.props
-```
-
-Local gate (needs `git fetch --tags`):
-
-```bash
+cat VERSION
+bash scripts/bump-version.sh
 bash scripts/check-version-bump.sh
-```
-
-Pack a single package (from repo root):
-
-```bash
 dotnet pack AudioSeparator.Abstractions/AudioSeparator.Abstractions.csproj -c Release -o ./artifacts
 ```
 
 ## Do not
 
-- Bump Examples or `Older/` csproj versions for NuGet.
-- Set different `Version` and `PackageVersion` values.
-- Put per-package `Version` back into publishable csproj files.
-- Merge to `main` without a SemVer bump above the latest `v*` tag.
+- Bump Examples or `Older/` for NuGet.
+- Hardcode `Version` / `PackageVersion` in publishable csproj or `Directory.Build.props`.
+- Merge to `main` without `VERSION` above the latest `v*` tag.
 - Publish without rebuilding after a version bump.
