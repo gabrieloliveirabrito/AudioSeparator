@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# On push to main: if VERSION is not in the pushed commits, auto-bump it and abort
+# so the bump can be committed. If VERSION is already in the range, only enforce the gate.
+set -euo pipefail
+
+ROOT="$(git rev-parse --show-toplevel)"
+ZERO="0000000000000000000000000000000000000000"
+
+version_in_range() {
+  local range="$1"
+  git -C "$ROOT" log --name-only --pretty=format: "$range" | grep -qx 'VERSION'
+}
+
+while read -r _local_ref local_sha remote_ref remote_sha; do
+  [[ "$remote_ref" == "refs/heads/main" ]] || continue
+  [[ "$local_sha" != "$ZERO" ]] || continue
+
+  if [[ "$remote_sha" == "$ZERO" ]]; then
+    range="$local_sha"
+  else
+    range="${remote_sha}..${local_sha}"
+  fi
+
+  if version_in_range "$range"; then
+    echo "pre-push (main): VERSION already in pushed commits; checking SemVer gate…"
+    bash "$ROOT/scripts/check-version-bump.sh"
+    continue
+  fi
+
+  echo "pre-push (main): VERSION not in pushed commits — auto-bumping…"
+  bash "$ROOT/scripts/bump-version.sh"
+  echo >&2
+  echo "error: VERSION was updated. Commit it and push again:" >&2
+  echo "  git add VERSION && git commit -m \"Bump VERSION for main\" && git push" >&2
+  exit 1
+done
+
+exit 0
