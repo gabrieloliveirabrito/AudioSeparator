@@ -4,8 +4,6 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>0.2.0-beta</Version>
-    <PackageVersion>0.2.0-beta</PackageVersion>
     <Title>AudioSeparator.Onnx.Mdx</Title>
     <Description>MDX-Net ONNX backend for AudioSeparator — UVR-style instrumental/vocals separation with host STFT.</Description>
     <PackageTags>audio;stem-separation;onnx;mdx;uvr;dotnet</PackageTags>

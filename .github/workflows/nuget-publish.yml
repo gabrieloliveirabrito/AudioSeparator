@@ -38,6 +38,7 @@ jobs:
             AudioSeparator.NAudio/AudioSeparator.NAudio.csproj
             AudioSeparator.Onnx/AudioSeparator.Onnx.csproj
             AudioSeparator.Onnx.Demucs/AudioSeparator.Onnx.Demucs.csproj
+            AudioSeparator.Onnx.Mdx/AudioSeparator.Onnx.Mdx.csproj
             AudioSeparator.Benchmark/AudioSeparator.Benchmark.csproj
           )
           for project in "${projects[@]}"; do
